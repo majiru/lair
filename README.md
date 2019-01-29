@@ -7,7 +7,7 @@ Lair
 Lair takes no arguments
 
 ## DESCRIPTION
-Lair is a rouge lite dungeon crawler built using plan9's libdraw.
+Lair is a rogue lite dungeon crawler built using plan9's libdraw.
 
 ## BUILDING
 
