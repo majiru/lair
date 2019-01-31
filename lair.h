@@ -23,6 +23,7 @@ enum {
 	TRoom,
 	TPortal,
 	TTunnel,
+	TPlayer,
 
 	TNUM
 };
@@ -37,13 +38,17 @@ struct Floor
 	int			*map;
 	Image 		**colorset;
 	Point		*tileorigin;
+	Point		playpos;
 } Floor;
 
 Floor *curfloor;
 
 /* floor.c */
-Floor*	mkfloor(Image **colorset);
 void	drawtofloor(Floor *f, Rectangle r, int tile);
+void	drawtile(Floor *f, Point p, int tile);
+Point	randempty(Floor *f);
+Point	spawnentity(Floor *f, int tile);
+int		moveentity(Floor *f, Point src, Point dest, int tile);
 void	drawfloor(Floor *f);
 int		additem(Floor *f, Point p, int tile);
 void	inititems(Floor *f);

@@ -2,6 +2,7 @@
 #include <libc.h>
 #include <draw.h>
 #include <event.h>
+#include <keyboard.h>
 #include "lair.h"
 
 char *buttons[] = {"exit", 0};
@@ -16,20 +17,55 @@ eresized(int new)
 	if(new && getwindow(display, Refnone) < 0)
 		sysfatal("Can't reattach to window");
 	resizefloor(curfloor);
+
 	//print("Cols %d\Rows %d\nSize %d\n", curfloor->cols, curfloor->rows, curfloor->rows * curfloor->cols);
+
+	//Create room cordinates
 	if(init)
 		initrooms(curfloor);
 
+	//Draw paths between rooms to floor map
 	for(i = 0; i < curfloor->nrooms - 1; i++)
 		path(curfloor, curfloor->rooms[i], curfloor->rooms[i+1]);
 
+	//Draw rooms to floor map
 	for(i = 0; i < curfloor->nrooms; i++)
 		drawtofloor(curfloor, curfloor->rooms[i], TRoom);
 	
+	//Draw player, items, portals to floor map
 	if(init)
 		inititems(curfloor);
 
 	drawfloor(curfloor);
+
+	curfloor->playpos = spawnentity(curfloor, TPlayer);
+}
+
+void
+handleaction(Rune rune)
+{
+	Point dst;
+	switch(rune){
+	case Kup:
+		dst = subpt(curfloor->playpos, Pt(0, 1));
+		break;
+	case Kdown:
+		dst = addpt(curfloor->playpos, Pt(0, 1));
+		break;
+	case Kleft:
+		dst = subpt(curfloor->playpos, Pt(1,0));
+		break;
+	case Kright:
+		dst = addpt(curfloor->playpos, Pt(1,0));
+		break;
+	case Kbs:
+	case Kdel:
+		exits(nil);
+	default:
+		return;
+	}
+	if(moveentity(curfloor, curfloor->playpos, dst, TPlayer))
+			curfloor->playpos = dst;
 }
 
 void
@@ -40,13 +76,13 @@ main(int argc, char *argv[])
 	Event ev;
 	int e;
 
-	if(initdraw(nil, nil, "rlg327") < 0)
-		sysfatal("rlg327: Failed to init screen %r");
+	if(initdraw(nil, nil, "lair") < 0)
+		sysfatal("lair: Failed to init screen %r");
 
 	srand(time(0));
 
 	curfloor = loadtilemap("tiles.img", "walls.img");
-	einit(Emouse);
+	einit(Emouse | Ekeyboard);
 
 	eresized(0);
 
@@ -56,5 +92,8 @@ main(int argc, char *argv[])
 		if((e == Emouse) && 
 			(ev.mouse.buttons & 4) &&
 			(emenuhit(3, &ev.mouse, &menu) == 0)) exits(nil);
+		if(e == Ekeyboard){
+			handleaction(ev.kbdc);
+		}
 	}
 }

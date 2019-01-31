@@ -14,46 +14,66 @@ drawtofloor(Floor *f, Rectangle r, int tile)
 }
 
 void
+drawtile(Floor *f, Point p, int tile)
+{
+	Point min, max;
+
+	min.x = p.x * TILESIZE + screen->r.min.x;
+	min.y = p.y * TILESIZE + screen->r.min.y;
+	max = addpt(min, Pt(TILESIZE, TILESIZE));
+	draw(screen, Rpt(min, max), f->colorset[tile], nil, f->tileorigin[tile]);
+}
+
+void
 drawfloor(Floor *f)
 {
 	int i, j;
 
 	for(i = 0; i < f->cols; i++)
-		for(j = 0; j < f->rows; j++){
-			Point p1 = {i * TILESIZE + screen->r.min.x, j * TILESIZE + screen->r.min.y};
-			Point p2 = addpt(p1, Pt(TILESIZE, TILESIZE));
-			Rectangle r = {p1, p2};
-			int tiletype = f->map[i*f->rows + j];
-			draw(screen, r, f->colorset[tiletype], nil, f->tileorigin[tiletype]);
-		}
+		for(j = 0; j < f->rows; j++)
+			drawtile(f, Pt(i, j), f->map[i*f->rows + j]);
+}
+
+Point
+randempty(Floor *f)
+{
+	Point p;
+
+	do{
+		p.x	= RRANGE(1, f->cols - 2);
+		p.y	= RRANGE(1, f->rows - 2);
+	}while(f->map[p.x * f->rows + p.y] != TRoom);
+
+	return p;
+}
+
+Point
+spawnentity(Floor *f, int tile)
+{
+	Point p = randempty(f);
+	drawtile(f, p, tile);
+	return p;
 }
 
 int
-additem(Floor *f, Point p, int tile)
+moveentity(Floor *f, Point src, Point dest, int tile)
 {
-	int n;
-	n = p.x * f->rows + p.y;
-	if(f->map[n] == TRoom){
-		f->map[n] = tile;
-		return 1;
-	}
-	return 0;
+	if(f->map[dest.x * f->rows + dest.y] == TEmpty)
+		return 0;
+	drawtile(f, src, f->map[src.x*f->rows + src.y]);
+	drawtile(f, dest, tile);
+	return 1;
 }
 
 void
 inititems(Floor *f)
 {
 	Point p;
-	int failed, passed;
-	for(failed = passed = 0; failed < 100 && passed < PORTALMAX;){
-		int success;
-		p.x	= RRANGE(1, f->cols - 2);
-		p.y	= RRANGE(1, f->rows - 2);
-		success = additem(f, p, TPortal);
-		failed += !success;
-		passed += success;
+	int i;
+	for(i = 0; i < PORTALMAX; i++){
+		p = randempty(f);
+		f->map[p.x * f->rows + p.y] = TPortal;
 	}
-
 }
 
 int
@@ -98,8 +118,8 @@ path(Floor *f, Rectangle r1, Rectangle r2)
 	else
 		r = Rpt(r2.min, r1.min);
 	print("%R %R %R\n", r1, r2, r);
-	drawtofloor(f, Rect(r.min.x, r.min.y, r.max.x, r.min.y+1), TTunnel);
-	drawtofloor(f, Rect(r.min.x, r.min.y, r.min.x+1, r.max.y), TTunnel);
+	drawtofloor(f, Rect(r.min.x, r.min.y, r.max.x+1, r.min.y+1), TTunnel);
+	drawtofloor(f, Rect(r.max.x, r.min.y, r.max.x+1, r.max.y+1), TTunnel);
 }
 
 void
@@ -115,7 +135,7 @@ resizefloor(Floor *f)
 
 	cursize = f->rows * f->cols;
 	newsize = newrows * newcols;
-	if(newsize > cursize){
+	if(newsize != cursize){
 		f->map = realloc(f->map, sizeof(int) * newsize);
 		f->map = memset(f->map, TEmpty, sizeof(int) * newsize);
 	}

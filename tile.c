@@ -3,10 +3,22 @@
 #include <draw.h>
 #include "lair.h"
 
+void
+addtile(Floor *f, char *file, Point p, int tile)
+{
+	int fd;
+	if((fd = open(file, OREAD)) < 0)
+		sysfatal("Lair: Could not find tilemap %s", file);
+
+	f->colorset[tile] = readimage(display, fd, 0);
+	replclipr(f->colorset[tile], 1, Rpt(p, Pt(p.x + TILESIZE, p.y + TILESIZE)));
+	f->tileorigin[tile] = p;
+	close(fd);
+}
+
 Floor*
 loadtilemap(char *tiles, char *walls)
 {
-	int fd;
 	Floor *f;
 	
 	f = mallocz(sizeof(Floor), 1);
@@ -14,37 +26,13 @@ loadtilemap(char *tiles, char *walls)
 
 	f->colorset = malloc(sizeof(Image*) * TNUM);
 	f->tileorigin = malloc(sizeof(Point) * TNUM);
-	if((fd = open(walls, OREAD)) < 0)
-		sysfatal("Lair: Could not find tilemap %s", walls);
-	
-	f->colorset[TEmpty] = readimage(display, fd, 0);
-	replclipr(f->colorset[TEmpty], 1, Rect(16, 128, 32, 144));
-	f->tileorigin[TEmpty] = Pt(16, 128);
 
-	close(fd);
-	if((fd = open(tiles, OREAD)) < 0)
-		sysfatal("Lair: Could not find tilemap %s", tiles);
-	
-	f->colorset[TRoom] 	= readimage(display, fd, 0);
-	replclipr(f->colorset[TRoom], 1, Rect(16, 128, 32, 144));
-	f->tileorigin[TRoom] = Pt(16, 128);
+	addtile(f, walls, Pt(16, 128), TEmpty);
+	addtile(f, tiles, Pt(16, 128), TRoom);
+	addtile(f, walls, Pt(32, 128), TPortal);
+	addtile(f, tiles, Pt(96, 16), TTunnel);
+	addtile(f, tiles, Pt(128, 224), TPlayer);
 
-	close(fd);
-	if((fd = open(walls, OREAD)) < 0)
-		sysfatal("Lair: Could not find tilemap %s", walls);
-
-	f->colorset[TPortal] = readimage(display, fd, 0);
-	replclipr(f->colorset[TPortal], 1, Rect(32, 128, 48, 144));
-	f->tileorigin[TPortal] = Pt(32, 128);
-	
-	close(fd);
-	if((fd = open(tiles, OREAD)) < 0)
-		sysfatal("Lair: Could not find tilemap %s", tiles);
-	
-	f->colorset[TTunnel] = readimage(display, fd, 0);
-	replclipr(f->colorset[TTunnel], 1, Rect(96, 16, 112, 32));
-	f->tileorigin[TTunnel] = Pt(96, 16);
-
-	close(fd);
 	return f;
 }
+
