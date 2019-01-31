@@ -112,14 +112,22 @@ initrooms(Floor *f)
 void
 path(Floor *f, Rectangle r1, Rectangle r2)
 {
-	Rectangle r;
-	if(r1.min.x * r1.min.y < r2.min.x * r2.min.y)
-		r = Rpt(r1.min, r2.min);
-	else
-		r = Rpt(r2.min, r1.min);
-	print("%R %R %R\n", r1, r2, r);
-	drawtofloor(f, Rect(r.min.x, r.min.y, r.max.x+1, r.min.y+1), TTunnel);
-	drawtofloor(f, Rect(r.max.x, r.min.y, r.max.x+1, r.max.y+1), TTunnel);
+	Point size = Pt(1,1);
+	Point p1 = r1.min;
+	Point p2 = r2.min;
+	if(p1.x > p2.x){
+		drawtofloor(f, Rpt(p2, Pt(p1.x, p2.y + 1)), TTunnel);
+		if(p1.y > p2.y)
+			drawtofloor(f, Rpt(Pt(p1.x - 1, p2.y), Pt(p1.x + 1, p2.y + 1)), TTunnel);
+		else
+			drawtofloor(f, Rpt(Pt(p1.x - 1, p1.y - 1), Pt(p1.x, p2.y + 1)), TTunnel);
+	}else{
+		drawtofloor(f, Rpt(p1, Pt(p2.x + 1, p1.y + 1)), TTunnel);
+		if(p2.y > p1.y)
+			drawtofloor(f, Rpt(Pt(p2.x, p1.y), Pt(p2.x + 1, p2.y)), TTunnel);
+		else
+			drawtofloor(f, Rpt(Pt(p2.x, p2.y + Dy(r2)), Pt(p2.x + 1, p1.y + 1)), TTunnel);
+	}
 }
 
 void
