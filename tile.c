@@ -22,7 +22,7 @@ loadtilemap(char *tiles, char *walls)
 	Floor *f;
 	
 	f = mallocz(sizeof(Floor), 1);
-	f->map = malloc(sizeof(int));
+	f->map = malloc(sizeof(Tile));
 
 	f->colorset = malloc(sizeof(Image*) * TNUM);
 	f->tileorigin = malloc(sizeof(Point) * TNUM);

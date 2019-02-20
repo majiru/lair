@@ -4,17 +4,23 @@
 #include "lair.h"
 
 void
-drawtofloor(Floor *f, Rectangle r, int tile)
+drawtotile(Floor *f, Point p, char tile)
+{
+	f->map[p.x * f->rows + p.y].type = tile;
+}
+
+void
+drawtofloor(Floor *f, Rectangle r, char tile)
 {
 	int i, j;
 
 	for(i = r.min.x; i < r.max.x; i++)
 		for(j = r.min.y; j < r.max.y; j++)
-			f->map[i * f->rows + j] = tile;
+			f->map[i * f->rows + j].type = tile;
 }
 
 void
-drawtile(Floor *f, Point p, int tile)
+drawtile(Floor *f, Point p, char tile)
 {
 	Point min, max;
 
@@ -31,7 +37,7 @@ drawfloor(Floor *f)
 
 	for(i = 0; i < f->cols; i++)
 		for(j = 0; j < f->rows; j++)
-			drawtile(f, Pt(i, j), f->map[i*f->rows + j]);
+			drawtile(f, Pt(i, j), f->map[i*f->rows + j].type);
 }
 
 Point
@@ -42,13 +48,13 @@ randempty(Floor *f)
 	do{
 		p.x	= RRANGE(1, f->cols - 2);
 		p.y	= RRANGE(1, f->rows - 2);
-	}while(f->map[p.x * f->rows + p.y] != TRoom);
+	}while(f->map[p.x * f->rows + p.y].type != TRoom);
 
 	return p;
 }
 
 Point
-spawnentity(Floor *f, int tile)
+spawnentity(Floor *f, char tile)
 {
 	Point p = randempty(f);
 	drawtile(f, p, tile);
@@ -56,11 +62,11 @@ spawnentity(Floor *f, int tile)
 }
 
 int
-moveentity(Floor *f, Point src, Point dest, int tile)
+moveentity(Floor *f, Point src, Point dest, char tile)
 {
-	if(f->map[dest.x * f->rows + dest.y] == TEmpty)
+	if(f->map[dest.x * f->rows + dest.y].type == TEmpty)
 		return 0;
-	drawtile(f, src, f->map[src.x*f->rows + src.y]);
+	drawtile(f, src, f->map[src.x*f->rows + src.y].type);
 	drawtile(f, dest, tile);
 	return 1;
 }
@@ -68,12 +74,9 @@ moveentity(Floor *f, Point src, Point dest, int tile)
 void
 inititems(Floor *f)
 {
-	Point p;
 	int i;
-	for(i = 0; i < PORTALMAX; i++){
-		p = randempty(f);
-		f->map[p.x * f->rows + p.y] = TPortal;
-	}
+	for(i = 0; i < PORTALMAX; i++)
+		drawtotile(f, randempty(f), TPortal);
 }
 
 int
@@ -112,7 +115,6 @@ initrooms(Floor *f)
 void
 path(Floor *f, Rectangle r1, Rectangle r2)
 {
-	Point size = Pt(1,1);
 	Point p1 = r1.min;
 	Point p2 = r2.min;
 	if(p1.x > p2.x){
@@ -133,20 +135,20 @@ path(Floor *f, Rectangle r1, Rectangle r2)
 void
 resizefloor(Floor *f)
 {
-	int cursize, newsize;
+	int newsize;
 	int newrows, newcols;
 
 	newrows = Dy(screen->r) / TILESIZE;
 	newcols = Dx(screen->r) / TILESIZE;
-	if(newcols < 5 || newrows < 5)
+	if(newcols < 10 || newrows < 10)
 		sysfatal("Not enough space to create game board...");
 
-	cursize = f->rows * f->cols;
+	if(f->rows == newrows && f->cols == newcols)
+		return;
+
 	newsize = newrows * newcols;
-	if(newsize != cursize){
-		f->map = realloc(f->map, sizeof(int) * newsize);
-		f->map = memset(f->map, TEmpty, sizeof(int) * newsize);
-	}
+	f->map = realloc(f->map, sizeof(Tile) * newsize);
+	f->map = memset(f->map, 0, sizeof(Tile) * newsize);
 
 	f->rows = newrows;
 	f->cols = newcols;

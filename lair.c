@@ -3,6 +3,7 @@
 #include <draw.h>
 #include <event.h>
 #include <keyboard.h>
+
 #include "lair.h"
 
 char *buttons[] = {"exit", 0};
@@ -33,12 +34,14 @@ eresized(int new)
 		drawtofloor(curfloor, curfloor->rooms[i], TRoom);
 	
 	//Draw player, items, portals to floor map
-	if(init)
+	if(init){
 		inititems(curfloor);
+		curfloor->playpos = spawnentity(curfloor, TPlayer);
+	}
 
 	drawfloor(curfloor);
 
-	curfloor->playpos = spawnentity(curfloor, TPlayer);
+	drawtile(curfloor, curfloor->playpos, TPlayer);
 }
 
 void
@@ -69,12 +72,34 @@ handleaction(Rune rune)
 }
 
 void
+usage(void)
+{
+	fprint(2, "Usage: %s [--save] [--load]\n", argv0);
+	exits("usage");
+}
+
+void
 main(int argc, char *argv[])
 {
-	USED(argc);
-	USED(argv);
 	Event ev;
-	int e;
+	int e, i;
+	int saveflg, loadflg;
+
+	saveflg = loadflg = 0;
+
+	for(i = 1; i < argc; ++i)
+		if(strlen(argv[i]) != 6)
+			usage();
+		else
+			switch(argv[i][2]){
+			case 's':
+				saveflg++;
+				break;
+			case 'l':
+				loadflg++;
+				break;
+			}
+			
 
 	if(initdraw(nil, nil, "lair") < 0)
 		sysfatal("lair: Failed to init screen %r");

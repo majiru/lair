@@ -9,16 +9,14 @@ overlaps(Rectangle r1, Rectangle r2)
     		r1.min.y < r2.max.y && r1.max.y > r2.min.y;
 }
 
-static Image*
-openimage(char *file)
+int
+isbigendian(void)
 {
-	int fd;
-	Image *i;
+	uint x = 0x76543210;
+	char *c = (char*) &x;
+	
+	if(*c == 0x10)
+		return 0;
 
-	if((fd = open(file, OREAD)) < 0)
-		return nil;
-
-	i = readimage(display, fd, 0);
-	close(fd);
-	return i;
+	return 1;
 }
