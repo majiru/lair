@@ -2,6 +2,7 @@
 #include <libc.h>
 #include <draw.h>
 #include <mp.h>
+#include <heap.h>
 
 #include "lair.h"
 

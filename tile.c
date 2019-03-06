@@ -1,6 +1,8 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <heap.h>
+
 #include "lair.h"
 
 void
@@ -32,6 +34,10 @@ loadtilemap(char *tiles, char *walls)
 	addtile(f, walls, Pt(32, 128), TPortal);
 	addtile(f, tiles, Pt(96, 16), TTunnel);
 	addtile(f, tiles, Pt(128, 224), TPlayer);
+	addtile(f, tiles, Pt(0, 160), TCreep);
+	addtile(f, tiles, Pt(16, 160), TCreepM);
+	addtile(f, tiles, Pt(32, 160), TCreepB);
+	addtile(f, tiles, Pt(48, 160), TCreepE);
 
 	return f;
 }

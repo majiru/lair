@@ -7,6 +7,9 @@ OFILES=\
 	tile.$O \
 	util.$O \
 	file.$O \
+	path.$O \
+	creep.$O \
+
 
 HFILES=lair.h
 

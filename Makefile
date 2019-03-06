@@ -1,8 +1,9 @@
 CC := ./9c
 LD := ./9l
-all: floor.c lair.c tile.c util.c
-	PLAN9=./ ./9c floor.c lair.c tile.c util.c
-	PLAN9=./ ./9l -o o.lair floor.o lair.o tile.o util.o
+
+all: floor.c lair.c tile.c util.c path.c creep.c
+	PLAN9=./ ./9c -O0 floor.c lair.c tile.c util.c path.c creep.c
+	PLAN9=./ ./9l -o o.lair floor.o lair.o tile.o util.o path.o creep.o
 
 clean:
 	rm -f o.* *.o

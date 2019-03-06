@@ -1,6 +1,8 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <heap.h>
+
 #include "lair.h"
 
 void
@@ -62,10 +64,25 @@ spawnentity(Floor *f, char tile)
 }
 
 int
-moveentity(Floor *f, Point src, Point dest, char tile)
+minewall(Floor *f, Point p)
+{
+	int n = MAPINDEXPT(f, p);
+	if(f->map[n].hardness <= 85){
+		f->map[n].hardness = 0;
+		f->map[n].type = TTunnel;
+		return 1;
+	}
+	f->map[n].hardness -= 85;
+	return 0;
+}
+
+
+int
+moveentity(Floor *f, Point src, Point dest, char tile, int canmine)
 {
 	if(f->map[dest.x * f->rows + dest.y].type == TEmpty)
-		return 0;
+		if(canmine == 0 || minewall(f, dest) == 0)
+			return 0;
 	drawtile(f, src, f->map[src.x*f->rows + src.y].type);
 	drawtile(f, dest, tile);
 	return 1;
@@ -130,6 +147,26 @@ path(Floor *f, Rectangle r1, Rectangle r2)
 		else
 			drawtofloor(f, Rpt(Pt(p2.x, p2.y + Dy(r2)), Pt(p2.x + 1, p1.y + 1)), TTunnel);
 	}
+}
+
+void
+assignhardness(Floor *f)
+{
+	int i, j;
+	for(i = 0; i < f->cols; i++)
+		for(j = 0; j < f->rows; j++)
+			switch(f->map[MAPINDEX(f, i, j)].type){
+			case TTunnel:
+			case TRoom:
+				f->map[MAPINDEX(f, i, j)].hardness = 0;
+				break;
+			case TEmpty:
+				if(i == 0 || j == 0 || i == f->cols - 1 || j == f->rows - 1)
+					f->map[MAPINDEX(f, i, j)].hardness = 255;
+				else
+					f->map[MAPINDEX(f, i, j)].hardness = RRANGE(1, 254);
+				break;
+			}
 }
 
 void

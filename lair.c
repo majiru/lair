@@ -3,6 +3,7 @@
 #include <draw.h>
 #include <event.h>
 #include <keyboard.h>
+#include <heap.h>
 
 #include "lair.h"
 
@@ -39,9 +40,16 @@ eresized(int new)
 		curfloor->playpos = spawnentity(curfloor, TPlayer);
 	}
 
+	//Assign hardness of tiles based on type
+	assignhardness(curfloor);
+
 	drawfloor(curfloor);
 
 	drawtile(curfloor, curfloor->playpos, TPlayer);
+
+	djikstra(curfloor);
+	spawncreep(curfloor);
+	//drawpath(curfloor);
 }
 
 void
@@ -67,8 +75,11 @@ handleaction(Rune rune)
 	default:
 		return;
 	}
-	if(moveentity(curfloor, curfloor->playpos, dst, TPlayer))
+	if(moveentity(curfloor, curfloor->playpos, dst, TPlayer, 0)){
+			djikstra(curfloor);
 			curfloor->playpos = dst;
+	}
+	tickcreep(curfloor);
 }
 
 void
@@ -99,7 +110,6 @@ main(int argc, char *argv[])
 				loadflg++;
 				break;
 			}
-			
 
 	if(initdraw(nil, nil, "lair") < 0)
 		sysfatal("lair: Failed to init screen %r");
