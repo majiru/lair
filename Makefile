@@ -1,9 +1,14 @@
-CC := ./9c
-LD := ./9l
+CC := 9c
+LD := 9l
 
-all: floor.c lair.c tile.c util.c path.c creep.c
-	PLAN9=./ ./9c -O0 floor.c lair.c tile.c util.c path.c creep.c
-	PLAN9=./ ./9l -o o.lair floor.o lair.o tile.o util.o path.o creep.o
+NOP9P: export PLAN9 = ./
+NOP9P: export CC = ./9c
+NOP9P: export LD = ./9l
+NOP9P: lair
+
+lair: floor.c lair.c tile.c util.c path.c creep.c
+	$(CC) floor.c lair.c tile.c util.c path.c creep.c
+	$(LD) -o o.lair floor.o lair.o tile.o util.o path.o creep.o
 
 clean:
 	rm -f o.* *.o
