@@ -38,6 +38,14 @@ enum {
 	TNUM
 };
 
+/* Tile Sheets */
+enum {
+	CSHEET, /* tile.img */
+	WSHEET, /* wall.img */
+
+	SHEETNUM
+};
+
 /* Creep options */
 enum {
 	CIntel = 	1,
@@ -64,6 +72,12 @@ struct Tile {
 	};
 } Tile;
 
+typedef
+struct Sprite {
+	char src;
+	Point p;
+} Sprite;
+
 /* Floor represents a single 'level' of the map */
 typedef
 struct Floor
@@ -71,12 +85,12 @@ struct Floor
 	int 		rows, cols;
 	int			nrooms;
 	Rectangle 	rooms[ROOMNUMMAX];
-	Tile		*map;
-	Image 		**colorset;
-	Point		*tileorigin;
-	Point		playpos;
-	Creep		*creeps[CREEPMAX];
 	int			ncreep;
+	Creep		*creeps[CREEPMAX];
+	Tile		*map;
+	Point		playpos;
+	Image 		*tilesheet[SHEETNUM];
+	Sprite		*sprites[TNUM];
 } Floor;
 
 typedef
@@ -103,6 +117,7 @@ void	initrooms(Floor *f);
 void	resizefloor(Floor *f);
 void	path(Floor *f, Rectangle r1, Rectangle r2);
 void	assignhardness(Floor *f);
+void	drawhardness(Floor *f);
 
 /* tile.c */
 Floor* loadtilemap(char *file, char *wal);
@@ -113,6 +128,7 @@ void	drawpath(Floor*);
 
 /* creep.c */
 void	spawncreep(Floor*);
+void	redrawcreep(Floor*);
 void	tickcreep(Floor*);
 
 /* utility.c */

@@ -5,16 +5,24 @@
 
 #include "lair.h"
 
+Sprite*
+mksprite(char sheetindex, int x, int y)
+{
+	Sprite *s = mallocz(sizeof(Sprite), 1);
+	s->p = Pt(x * TILESIZE, y * TILESIZE);
+	s->src = sheetindex;
+
+	return s;
+}
+
 void
-addtile(Floor *f, char *file, Point p, int tile)
+loadsheet(Floor *f, char *file, char sheetindex)
 {
 	int fd;
 	if((fd = open(file, OREAD)) < 0)
-		sysfatal("Lair: Could not find tilemap %s", file);
+		sysfatal("%s: Could not find tilemap %s", argv0, file);
 
-	f->colorset[tile] = readimage(display, fd, 0);
-	replclipr(f->colorset[tile], 1, Rpt(p, Pt(p.x + TILESIZE, p.y + TILESIZE)));
-	f->tileorigin[tile] = p;
+	f->tilesheet[sheetindex] = readimage(display, fd, 0);
 	close(fd);
 }
 
@@ -26,18 +34,18 @@ loadtilemap(char *tiles, char *walls)
 	f = mallocz(sizeof(Floor), 1);
 	f->map = malloc(sizeof(Tile));
 
-	f->colorset = malloc(sizeof(Image*) * TNUM);
-	f->tileorigin = malloc(sizeof(Point) * TNUM);
+	loadsheet(f, tiles, CSHEET);
+	loadsheet(f, walls, WSHEET);
 
-	addtile(f, walls, Pt(16, 128), TEmpty);
-	addtile(f, tiles, Pt(16, 128), TRoom);
-	addtile(f, walls, Pt(32, 128), TPortal);
-	addtile(f, tiles, Pt(96, 16), TTunnel);
-	addtile(f, tiles, Pt(128, 224), TPlayer);
-	addtile(f, tiles, Pt(0, 160), TCreep);
-	addtile(f, tiles, Pt(16, 160), TCreepM);
-	addtile(f, tiles, Pt(32, 160), TCreepB);
-	addtile(f, tiles, Pt(48, 160), TCreepE);
+	f->sprites[TEmpty] = mksprite(WSHEET, 1, 8);
+	f->sprites[TRoom] = mksprite(CSHEET, 1, 8);
+	f->sprites[TPortal] = mksprite(WSHEET, 2, 8);
+	f->sprites[TTunnel] = mksprite(CSHEET, 6, 1);
+	f->sprites[TPlayer] = mksprite(CSHEET, 8, 14);
+	f->sprites[TCreep] = mksprite(CSHEET, 0, 10);
+	f->sprites[TCreepM] = mksprite(CSHEET, 1, 10);
+	f->sprites[TCreepB] = mksprite(CSHEET, 2, 10);
+	f->sprites[TCreepE] = mksprite(CSHEET, 3, 10);
 
 	return f;
 }

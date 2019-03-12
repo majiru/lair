@@ -25,11 +25,12 @@ void
 drawtile(Floor *f, Point p, char tile)
 {
 	Point min, max;
+	Sprite *s = f->sprites[tile];
 
 	min.x = p.x * TILESIZE + screen->r.min.x;
 	min.y = p.y * TILESIZE + screen->r.min.y;
 	max = addpt(min, Pt(TILESIZE, TILESIZE));
-	draw(screen, Rpt(min, max), f->colorset[tile], nil, f->tileorigin[tile]);
+	draw(screen, Rpt(min, max), f->tilesheet[s->src], nil, s->p);
 }
 
 void
@@ -170,6 +171,23 @@ assignhardness(Floor *f)
 }
 
 void
+drawhardness(Floor *f)
+{
+	Point min;
+	char buf[2];
+	int i, j;
+
+	for(i = 0; i < f->cols; i++)
+		for(j = 0; j < f->rows; j++){
+			min.x = i * TILESIZE + screen->r.min.x;
+			min.y = j * TILESIZE + screen->r.min.y;
+			snprint(buf, 2, "%d", (uchar) f->map[MAPINDEX(f, i, j)].hardness % 10);
+			string(screen, min, display->white, min, font, buf);
+		}
+
+}
+
+void
 resizefloor(Floor *f)
 {
 	int newsize;
@@ -185,7 +203,7 @@ resizefloor(Floor *f)
 
 	newsize = newrows * newcols;
 	f->map = realloc(f->map, sizeof(Tile) * newsize);
-	f->map = memset(f->map, 0, sizeof(Tile) * newsize);
+	f->map = memset(f->map, TEmpty, sizeof(Tile) * newsize);
 
 	f->rows = newrows;
 	f->cols = newcols;
