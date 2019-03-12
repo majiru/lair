@@ -68,6 +68,30 @@ djikstra(Floor *f)
 			f->map[i].pcdistance = f->map[j].pcdistance + 1;
 			heap_decrease_key_no_replace(&h, path[i].n);
 		}
+
+		i = MAPINDEX(f, p->pos.x + 1, p->pos.y + 1);
+		if(path[i].n != nil && f->map[i].pcdistance > f->map[j].pcdistance + 1){
+			f->map[i].pcdistance = f->map[j].pcdistance + 1;
+			heap_decrease_key_no_replace(&h, path[i].n);
+		}
+
+		i = MAPINDEX(f, p->pos.x - 1, p->pos.y - 1);
+		if(path[i].n != nil && f->map[i].pcdistance > f->map[j].pcdistance + 1){
+			f->map[i].pcdistance = f->map[j].pcdistance + 1;
+			heap_decrease_key_no_replace(&h, path[i].n);
+		}
+
+		i = MAPINDEX(f, p->pos.x + 1, p->pos.y - 1);
+		if(path[i].n != nil && f->map[i].pcdistance > f->map[j].pcdistance + 1){
+			f->map[i].pcdistance = f->map[j].pcdistance + 1;
+			heap_decrease_key_no_replace(&h, path[i].n);
+		}
+
+		i = MAPINDEX(f, p->pos.x - 1, p->pos.y + 1);
+		if(path[i].n != nil && f->map[i].pcdistance > f->map[j].pcdistance + 1){
+			f->map[i].pcdistance = f->map[j].pcdistance + 1;
+			heap_decrease_key_no_replace(&h, path[i].n);
+		}
 	}
 	free(path);
 }
@@ -76,14 +100,14 @@ void
 drawpath(Floor *f)
 {
 	Point min;
-	char buf[256];
+	char buf[2];
 	int i, j;
 
 	for(i = 0; i < f->cols; i++)
 		for(j = 0; j < f->rows; j++){
 			min.x = i * TILESIZE + screen->r.min.x;
 			min.y = j * TILESIZE + screen->r.min.y;
-			snprint(buf, 256, "%d", f->map[MAPINDEX(f, i, j)].pcdistance % 10);
+			snprint(buf, 2, "%d", f->map[MAPINDEX(f, i, j)].pcdistance % 10);
 			string(screen, min, display->white, min, font, buf);
 		}
 }

@@ -18,7 +18,7 @@ spawncreep(Floor *f)
 		if(rand() % 2 == 0)
 			c->type |= CTele;
 
-		if(rand() % 5 > 2)
+		if(rand() % 2 == 0)
 			c->type |= CTunnel;
 
 		if(rand() % 2 == 0)
@@ -28,6 +28,14 @@ spawncreep(Floor *f)
 		c->pos = spawnentity(f, c->tile);
 		f->creeps[f->ncreep++] = c;
 	}
+}
+
+void
+redrawcreep(Floor *f)
+{
+	int i;
+	for(i = 0; i < f->ncreep; i++)
+		drawtile(f, f->creeps[i]->pos, f->creeps[i]->tile);
 }
 
 void
@@ -47,13 +55,28 @@ tickcreep(Floor *f)
 		}
 
 		if(f->map[MAPINDEX(f, f->creeps[i]->pos.x, f->creeps[i]->pos.y + 1)].pcdistance < lowest){
-			lowest = f->map[MAPINDEX(f, f->creeps[i]->pos.x - 1, f->creeps[i]->pos.y + 1)].pcdistance;
+			lowest = f->map[MAPINDEX(f, f->creeps[i]->pos.x, f->creeps[i]->pos.y + 1)].pcdistance;
 			dest = addpt(f->creeps[i]->pos, Pt(0, 1));
 		}
 
 		if(f->map[MAPINDEX(f, f->creeps[i]->pos.x, f->creeps[i]->pos.y - 1)].pcdistance < lowest){
-			lowest = f->map[MAPINDEX(f, f->creeps[i]->pos.x - 1, f->creeps[i]->pos.y - 1)].pcdistance;
+			lowest = f->map[MAPINDEX(f, f->creeps[i]->pos.x, f->creeps[i]->pos.y - 1)].pcdistance;
 			dest = subpt(f->creeps[i]->pos, Pt(0, 1));
+		}
+
+		if(f->map[MAPINDEX(f, f->creeps[i]->pos.x - 1, f->creeps[i]->pos.y - 1)].pcdistance < lowest){
+			lowest = f->map[MAPINDEX(f, f->creeps[i]->pos.x - 1, f->creeps[i]->pos.y - 1)].pcdistance;
+			dest = subpt(f->creeps[i]->pos, Pt(1, 1));
+		}
+
+		if(f->map[MAPINDEX(f, f->creeps[i]->pos.x + 1, f->creeps[i]->pos.y - 1)].pcdistance < lowest){
+			lowest = f->map[MAPINDEX(f, f->creeps[i]->pos.x + 1, f->creeps[i]->pos.y - 1)].pcdistance;
+			dest = Pt(f->creeps[i]->pos.x + 1, f->creeps[i]->pos.y - 1);
+		}
+
+		if(f->map[MAPINDEX(f, f->creeps[i]->pos.x - 1, f->creeps[i]->pos.y + 1)].pcdistance < lowest){
+			lowest = f->map[MAPINDEX(f, f->creeps[i]->pos.x - 1, f->creeps[i]->pos.y + 1)].pcdistance;
+			dest = Pt(f->creeps[i]->pos.x - 1, f->creeps[i]->pos.y + 1);
 		}
 
 		if(moveentity(f, f->creeps[i]->pos, dest, f->creeps[i]->tile, (f->creeps[i]->type && CTunnel) == 0) != 0)
