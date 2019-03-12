@@ -6,13 +6,79 @@
 #include "lair.h"
 
 void
-drawtotile(Floor *f, Point p, char tile)
+freefloor(Floor *f, int freesheet)
+{
+	while(f->ncreep != 0)
+		free(f->creeps[f->ncreep--]);
+
+	free(f->map);
+
+	if(freesheet)
+		freeimage(f->tilesheet);
+
+	free(f);
+}
+
+void
+initfloor(Floor *f)
+{
+	int i;
+	initrooms(f);
+
+	for(i = 0; i < f->nrooms - 1; i++)
+		path(f, f->rooms[i], f->rooms[i+1]);
+
+	for(i = 0; i < f->nrooms; i++)
+		drawtofloor(f, f->rooms[i], TRoom);
+
+	inititems(f);
+	assignhardness(f);
+	f->playpos = spawnentity(f, TPlayer);
+	djikstra(f);
+	spawncreep(f);
+}
+
+Floor*
+newfloor(void)
+{
+	Floor *f;
+	int fd;
+
+	f = mallocz(sizeof(Floor), 1);
+	f->map = malloc(sizeof(Tile));
+
+	if((fd = open("tiles.img", OREAD)) < 0)
+		sysfatal("%s: Could not find tilemap", argv0);
+
+	f->tilesheet = readimage(display, fd, 0);
+	close(fd);
+
+	return f;
+}
+
+void
+nextfloor(Floor **f)
+{
+	Floor *new = mallocz(sizeof(Floor), 1);
+	new->map = malloc(sizeof(Tile));
+	new->tilesheet = (*f)->tilesheet;
+	resizefloor(new);
+
+	freefloor(*f, 0);
+
+	curdepth++;
+	*f = new;
+	initfloor(*f);
+}
+
+void
+drawtotile(Floor *f, Point p, uchar tile)
 {
 	f->map[p.x * f->rows + p.y].type = tile;
 }
 
 void
-drawtofloor(Floor *f, Rectangle r, char tile)
+drawtofloor(Floor *f, Rectangle r, uchar tile)
 {
 	int i, j;
 
@@ -22,15 +88,14 @@ drawtofloor(Floor *f, Rectangle r, char tile)
 }
 
 void
-drawtile(Floor *f, Point p, char tile)
+drawtile(Floor *f, Point p, uchar tile)
 {
 	Point min, max;
-	Sprite *s = f->sprites[tile];
 
 	min.x = p.x * TILESIZE + screen->r.min.x;
 	min.y = p.y * TILESIZE + screen->r.min.y;
 	max = addpt(min, Pt(TILESIZE, TILESIZE));
-	draw(screen, Rpt(min, max), f->tilesheet[s->src], nil, s->p);
+	draw(screen, Rpt(min, max), f->tilesheet, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
 }
 
 void
@@ -57,7 +122,7 @@ randempty(Floor *f)
 }
 
 Point
-spawnentity(Floor *f, char tile)
+spawnentity(Floor *f, uchar tile)
 {
 	Point p = randempty(f);
 	drawtile(f, p, tile);
@@ -79,7 +144,7 @@ minewall(Floor *f, Point p)
 
 
 int
-moveentity(Floor *f, Point src, Point dest, char tile, int canmine)
+moveentity(Floor *f, Point src, Point dest, uchar tile, int canmine)
 {
 	if(f->map[dest.x * f->rows + dest.y].type == TEmpty)
 		if(canmine == 0 || minewall(f, dest) == 0)
@@ -93,8 +158,10 @@ void
 inititems(Floor *f)
 {
 	int i;
-	for(i = 0; i < PORTALMAX; i++)
-		drawtotile(f, randempty(f), TPortal);
+	for(i = 0; i < PORTALMAX / 2; i++)
+		drawtotile(f, randempty(f), TPortalD);
+	for(i = 0; i < PORTALMAX / 2; i++)
+		drawtotile(f, randempty(f), TPortalU);
 }
 
 int

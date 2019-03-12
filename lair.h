@@ -2,6 +2,8 @@
 #define TILESIZE 16
 #define TILEBORDER 1
 
+#define PALETTENUM 3
+
 #define ROOMNUMMAX 20
 #define ROOMMINX 4
 #define ROOMMINY 3
@@ -27,23 +29,16 @@
 enum {
 	TEmpty,
 	TRoom,
-	TPortal,
 	TTunnel,
 	TPlayer,
+	TPortalD,
+	TPortalU,
 	TCreep,
 	TCreepM,
 	TCreepB,
 	TCreepE,
 
 	TNUM
-};
-
-/* Tile Sheets */
-enum {
-	CSHEET, /* tile.img */
-	WSHEET, /* wall.img */
-
-	SHEETNUM
 };
 
 /* Creep options */
@@ -56,27 +51,18 @@ enum {
 
 typedef
 struct Creep {
-	char type;
-	char tile;
+	uchar type;
+	uchar tile;
 	Point pos;
 } Creep;
 
 typedef
 struct Tile {
-	char type;
-	char hardness;
+	uchar type;
+	uchar hardness;
 	int pcdistance;
-	union {
-		char portaldest;
-		char itemID;
-	};
+	uchar itemID;
 } Tile;
-
-typedef
-struct Sprite {
-	char src;
-	Point p;
-} Sprite;
 
 /* Floor represents a single 'level' of the map */
 typedef
@@ -89,8 +75,7 @@ struct Floor
 	Creep		*creeps[CREEPMAX];
 	Tile		*map;
 	Point		playpos;
-	Image 		*tilesheet[SHEETNUM];
-	Sprite		*sprites[TNUM];
+	Image 		*tilesheet;
 } Floor;
 
 typedef
@@ -102,25 +87,29 @@ struct Path{
 
 Floor *curfloor;
 
-/* floor.c */
-void	drawtotile(Floor *f, Point p, char tile);
-void	drawtofloor(Floor *f, Rectangle r, char tile);
-void	drawtile(Floor *f, Point p, char tile);
-Point	randempty(Floor *f);
-Point	spawnentity(Floor *f, char tile);
-int		moveentity(Floor *f, Point src, Point dest, char tile, int canmove);
-void	drawfloor(Floor *f);
-int		additem(Floor *f, Point p, char tile);
-void	inititems(Floor *f);
-int		addroom(Floor *f, Rectangle r);
-void	initrooms(Floor *f);
-void	resizefloor(Floor *f);
-void	path(Floor *f, Rectangle r1, Rectangle r2);
-void	assignhardness(Floor *f);
-void	drawhardness(Floor *f);
+uchar curdepth = 0;
 
-/* tile.c */
-Floor* loadtilemap(char *file, char *wal);
+/* floor.c */
+Floor*	newfloor(void);
+void	nextfloor(Floor**);
+void	freefloor(Floor*, int);
+void	initfloor(Floor*);
+void	drawtotile(Floor*, Point, uchar);
+void	drawtofloor(Floor *, Rectangle, uchar);
+void	drawtile(Floor*, Point, uchar);
+Point	randempty(Floor*);
+Point	spawnentity(Floor*, uchar);
+int		moveentity(Floor*, Point, Point, uchar, int);
+void	drawfloor(Floor*);
+int		additem(Floor*, Point, uchar);
+void	inititems(Floor*);
+int		addroom(Floor*, Rectangle);
+void	initrooms(Floor*);
+void	resizefloor(Floor*);
+void	path(Floor*, Rectangle, Rectangle);
+void	assignhardness(Floor*);
+void	drawhardness(Floor*);
+
 
 /* path.c */
 void	djikstra(Floor*);
@@ -132,5 +121,5 @@ void	redrawcreep(Floor*);
 void	tickcreep(Floor*);
 
 /* utility.c */
-int				overlaps(Rectangle r1, Rectangle r2);
+int				overlaps(Rectangle, Rectangle);
 int				isbigendian(void);

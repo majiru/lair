@@ -6,9 +6,9 @@ NOP9P: export CC = ./9c
 NOP9P: export LD = ./9l
 NOP9P: lair
 
-lair: floor.c lair.c tile.c util.c path.c creep.c
-	$(CC) floor.c lair.c tile.c util.c path.c creep.c
-	$(LD) -o o.lair floor.o lair.o tile.o util.o path.o creep.o
+lair: floor.c lair.c util.c path.c creep.c
+	$(CC) floor.c lair.c util.c path.c creep.c
+	$(LD) -o o.lair floor.o lair.o util.o path.o creep.o
 
 clean:
 	rm -f o.* *.o

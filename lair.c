@@ -13,42 +13,17 @@ Menu menu = {buttons};
 void
 eresized(int new)
 {
-	int i;
-	int init = (curfloor->nrooms == 0);
-
 	if(new && getwindow(display, Refnone) < 0)
 		sysfatal("Can't reattach to window");
 	resizefloor(curfloor);
 
-	//print("Cols %d\Rows %d\nSize %d\n", curfloor->cols, curfloor->rows, curfloor->rows * curfloor->cols);
-
 	//Create room cordinates
-	if(init)
-		initrooms(curfloor);
-
-	//Draw paths between rooms to floor map
-	for(i = 0; i < curfloor->nrooms - 1; i++)
-		path(curfloor, curfloor->rooms[i], curfloor->rooms[i+1]);
-
-	//Draw rooms to floor map
-	for(i = 0; i < curfloor->nrooms; i++)
-		drawtofloor(curfloor, curfloor->rooms[i], TRoom);
-	
-	//Draw player, items, portals to floor map
-	if(init){
-		inititems(curfloor);
-		curfloor->playpos = spawnentity(curfloor, TPlayer);
-	}
-
-	//Assign hardness of tiles based on type
-	assignhardness(curfloor);
+	if(curfloor->nrooms == 0)
+		initfloor(curfloor);
 
 	drawfloor(curfloor);
-
+	redrawcreep(curfloor);
 	drawtile(curfloor, curfloor->playpos, TPlayer);
-
-	djikstra(curfloor);
-	spawncreep(curfloor);
 }
 
 void
@@ -65,9 +40,7 @@ handleaction(Rune rune)
 
 	/* Menu/Debug keys, does not count as player turn */
 	case 's':
-		drawfloor(curfloor);
-		redrawcreep(curfloor);
-		drawtile(curfloor, curfloor->playpos, TPlayer);
+		eresized(0);
 		return;
 
 	case 'D':
@@ -79,6 +52,12 @@ handleaction(Rune rune)
 		return;
 
 	/* Movement/Action keys */
+	case '<':
+	case '>':
+		nextfloor(&curfloor);
+		eresized(0);
+		return;
+
 	case Khome:
 	case '7':
 	case 'y':
@@ -176,7 +155,7 @@ main(int argc, char *argv[])
 
 	srand(time(0));
 
-	curfloor = loadtilemap("tiles.img", "walls.img");
+	curfloor = newfloor();
 	einit(Emouse | Ekeyboard);
 
 	eresized(0);

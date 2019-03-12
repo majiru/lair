@@ -4,7 +4,6 @@ TARG=lair
 OFILES=\
 	lair.$O \
 	floor.$O \
-	tile.$O \
 	util.$O \
 	file.$O \
 	path.$O \

@@ -94,16 +94,13 @@ openfile(Floor *f, char *name)
 		drawtofloor(f, f->rooms[i], TRoom);
 	}
 	
-	/* Read in Portals
-	* TODO: Add difference between down and up
-	*/
 	j = readbe16(fd, &b);
 	for(i = 0; i < j; i++)
-		drawtotile(f, readbept(fd, &b), TPortal);
+		drawtotile(f, readbept(fd, &b), TPortalD);
 
 	j = readbe16(fd, &b);
 	for(i = 0; i < j; i++)
-		drawtotile(f, readbept(fd, &b), TPortal);
+		drawtotile(f, readbept(fd, &b), TPortalU);
 
 	close(fd);
 }
