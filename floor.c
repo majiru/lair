@@ -20,11 +20,9 @@ freefloor(Floor *f, int freesheet)
 }
 
 void
-initfloor(Floor *f)
+initmap(Floor *f)
 {
 	int i;
-	initrooms(f);
-
 	for(i = 0; i < f->nrooms - 1; i++)
 		path(f, f->rooms[i], f->rooms[i+1]);
 
@@ -33,8 +31,14 @@ initfloor(Floor *f)
 
 	inititems(f);
 	assignhardness(f);
+}
+
+void
+initfloor(Floor *f)
+{
+	initrooms(f);
+	initmap(f);
 	f->playpos = spawnentity(f, TPlayer);
-	djikstra(f);
 	spawncreep(f);
 }
 
@@ -146,6 +150,9 @@ minewall(Floor *f, Point p)
 int
 moveentity(Floor *f, Point src, Point dest, uchar tile, int canmine)
 {
+	if(isoccupied(f, dest))
+		return 0;
+
 	if(f->map[dest.x * f->rows + dest.y].type == TEmpty)
 		if(canmine == 0 || minewall(f, dest) == 0)
 			return 0;
@@ -200,20 +207,24 @@ initrooms(Floor *f)
 void
 path(Floor *f, Rectangle r1, Rectangle r2)
 {
-	Point p1 = r1.min;
-	Point p2 = r2.min;
-	if(p1.x > p2.x){
-		drawtofloor(f, Rpt(p2, Pt(p1.x, p2.y + 1)), TTunnel);
-		if(p1.y > p2.y)
-			drawtofloor(f, Rpt(Pt(p1.x - 1, p2.y), Pt(p1.x + 1, p2.y + 1)), TTunnel);
-		else
-			drawtofloor(f, Rpt(Pt(p1.x - 1, p1.y - 1), Pt(p1.x, p2.y + 1)), TTunnel);
-	}else{
-		drawtofloor(f, Rpt(p1, Pt(p2.x + 1, p1.y + 1)), TTunnel);
-		if(p2.y > p1.y)
-			drawtofloor(f, Rpt(Pt(p2.x, p1.y), Pt(p2.x + 1, p2.y)), TTunnel);
-		else
-			drawtofloor(f, Rpt(Pt(p2.x, p2.y + Dy(r2)), Pt(p2.x + 1, p1.y + 1)), TTunnel);
+	Point tmp;
+
+	while(eqpt(r1.min,r2.min) == 0){
+		tmp = subpt(r1.min, r2.min);
+
+		if(tmp.x < 0)
+			r1.min = addpt(r1.min, Pt(1,0));
+		else if(tmp.x > 0)
+			r1.min = subpt(r1.min, Pt(1,0));
+
+		drawtotile(f, r1.min, TTunnel);
+
+		if(tmp.y < 0)
+			r1.min = addpt(r1.min, Pt(0,1));
+		else if(tmp.y > 0)
+			r1.min = subpt(r1.min, Pt(0,1));
+
+		drawtotile(f, r1.min, TTunnel);
 	}
 }
 
@@ -257,7 +268,7 @@ drawhardness(Floor *f)
 void
 resizefloor(Floor *f)
 {
-	int newsize;
+	int newsize, oldsize;
 	int newrows, newcols;
 
 	newrows = Dy(screen->r) / TILESIZE;
@@ -269,7 +280,10 @@ resizefloor(Floor *f)
 		return;
 
 	newsize = newrows * newcols;
-	f->map = realloc(f->map, sizeof(Tile) * newsize);
+	oldsize = f->rows * f->cols;
+
+	if(newsize > oldsize)
+		f->map = realloc(f->map, sizeof(Tile) * newsize);
 	f->map = memset(f->map, TEmpty, sizeof(Tile) * newsize);
 
 	f->rows = newrows;

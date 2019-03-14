@@ -61,6 +61,7 @@ struct Tile {
 	uchar type;
 	uchar hardness;
 	int pcdistance;
+	int tunneldistance;
 	uchar itemID;
 } Tile;
 
@@ -87,12 +88,16 @@ struct Path{
 
 Floor *curfloor;
 
-uchar curdepth = 0;
+uchar curdepth;
+
+Image *black;
+Image *white;
 
 /* floor.c */
 Floor*	newfloor(void);
 void	nextfloor(Floor**);
 void	freefloor(Floor*, int);
+void	initmap(Floor *f);
 void	initfloor(Floor*);
 void	drawtotile(Floor*, Point, uchar);
 void	drawtofloor(Floor *, Rectangle, uchar);
@@ -113,13 +118,20 @@ void	drawhardness(Floor*);
 
 /* path.c */
 void	djikstra(Floor*);
+void	djikstratunnel(Floor*);
 void	drawpath(Floor*);
+void	drawpathtunnel(Floor*);
 
 /* creep.c */
+int		isoccupied(Floor*, Point);
 void	spawncreep(Floor*);
 void	redrawcreep(Floor*);
 void	tickcreep(Floor*);
 
 /* utility.c */
-int				overlaps(Rectangle, Rectangle);
-int				isbigendian(void);
+int	overlaps(Rectangle, Rectangle);
+int	isbigendian(void);
+
+/* menu.c */
+void	monstermenu(Floor*, Point*);
+void	resetcur(Floor*f);

@@ -8,6 +8,7 @@ OFILES=\
 	file.$O \
 	path.$O \
 	creep.$O \
+	menu.$O \
 
 
 HFILES=lair.h
