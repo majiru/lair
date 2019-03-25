@@ -13,9 +13,9 @@ Menu menu = {buttons};
 int inmenu;
 
 void
-eresized(int new)
+eresized(int isnew)
 {
-	if(new && getwindow(display, Refnone) < 0)
+	if(isnew && getwindow(display, Refnone) < 0)
 		sysfatal("Can't reattach to window");
 	resizefloor(curfloor);
 

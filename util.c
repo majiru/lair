@@ -1,6 +1,9 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <heap.h>
+
+#include "lair.h"
 
 int
 overlaps(Rectangle r1, Rectangle r2)

@@ -63,15 +63,15 @@ newfloor(void)
 void
 nextfloor(Floor **f)
 {
-	Floor *new = mallocz(sizeof(Floor), 1);
-	new->map = malloc(sizeof(Tile));
-	new->tilesheet = (*f)->tilesheet;
-	resizefloor(new);
+	Floor *newf = mallocz(sizeof(Floor), 1);
+	newf->map = malloc(sizeof(Tile));
+	newf->tilesheet = (*f)->tilesheet;
+	resizefloor(newf);
 
 	freefloor(*f, 0);
 
 	curdepth++;
-	*f = new;
+	*f = newf;
 	initfloor(*f);
 }
 
