@@ -17,6 +17,10 @@
 #define CREEPMAX 100
 #define NUMCREEP 10
 
+#if defined __cplusplus
+extern "C" void p9main(int,char**);
+#endif
+
 /* Utility macros */
 #define MAX(a, b) (a) > (b) ? (a) : (b)
 #define MIN(a, b) (a) < (b) ? (a) : (b)
@@ -86,12 +90,12 @@ struct Path{
 	int cost;
 } Path;
 
-Floor *curfloor;
+extern Floor *curfloor;
 
-uchar curdepth;
+extern uchar curdepth;
 
-Image *black;
-Image *white;
+extern Image *black;
+extern Image *white;
 
 /* floor.c */
 Floor*	newfloor(void);

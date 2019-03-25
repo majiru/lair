@@ -12,6 +12,13 @@ Menu menu = {buttons};
 
 int inmenu;
 
+Floor *curfloor;
+
+uchar curdepth;
+
+Image *black;
+Image *white;
+
 void
 eresized(int isnew)
 {
@@ -170,7 +177,7 @@ usage(void)
 }
 
 void
-main(int argc, char *argv[])
+p9main(int argc, char *argv[])
 {
 	Event ev;
 	int e, i;
