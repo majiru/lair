@@ -1,7 +1,7 @@
 CC := 9c
 LD := 9l
 
-NOP9P: export PLAN9 = ./
+NOP9P: export PLAN9 = .
 NOP9P: export CC = ./9c
 NOP9P: export LD = ./9l
 NOP9P: lair
