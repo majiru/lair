@@ -19,6 +19,9 @@ uchar curdepth;
 Image *black;
 Image *white;
 
+int cheatDefog;
+int cheatTeleport;
+
 void
 eresized(int isnew)
 {
@@ -30,8 +33,10 @@ eresized(int isnew)
 	if(curfloor->nrooms == 0)
 		initfloor(curfloor);
 	else
+		/*BUG: This causes resize to 'move' the objectives */
 		initmap(curfloor);
 
+	discover(curfloor);
 	drawfloor(curfloor);
 	redrawcreep(curfloor);
 	drawtile(curfloor, curfloor->playpos, TPlayer);
@@ -56,10 +61,7 @@ handleaction(Rune rune)
 		inmenu = 0;
 	/* fallthrough */
 	case 's':
-		drawfloor(curfloor);
-		redrawcreep(curfloor);
-		drawtile(curfloor, curfloor->playpos, TPlayer);
-		return;
+		goto draw;
 
 	case 'D':
 		drawpath(curfloor);
@@ -78,23 +80,23 @@ handleaction(Rune rune)
 		inmenu = 1;
 		return;
 
+	case 'f':
+		cheatDefog = !cheatDefog;
+		goto draw;
+
+	case 't':
+		cheatTeleport = !cheatTeleport;
+		return;
+
 	/* Movement/Action keys */
 	case '<':
-		if(curfloor->map[PCINDEX(curfloor)].type == TPortalD){
-			nextfloor(&curfloor);
-			drawfloor(curfloor);
-			redrawcreep(curfloor);
-			drawtile(curfloor, curfloor->playpos, TPlayer);
-		}
+		if(curfloor->map[PCINDEX(curfloor)].type == TPortalD)
+			goto draw;
 		return;
 
 	case '>':
-		if(curfloor->map[PCINDEX(curfloor)].type == TPortalU){
-			nextfloor(&curfloor);
-			drawfloor(curfloor);
-			redrawcreep(curfloor);
-			drawtile(curfloor, curfloor->playpos, TPlayer);
-		}
+		if(curfloor->map[PCINDEX(curfloor)].type == TPortalU)
+			goto draw;
 		return;
 
 	case Khome:
@@ -167,6 +169,13 @@ handleaction(Rune rune)
 			curfloor->playpos = dst;
 	}
 	tickcreep(curfloor);
+
+draw:
+	discover(curfloor);
+	drawfloor(curfloor);
+	redrawcreep(curfloor);
+	drawtile(curfloor, curfloor->playpos, TPlayer);
+
 }
 
 void
@@ -184,6 +193,7 @@ p9main(int argc, char *argv[])
 	int saveflg, loadflg;
 
 	curdepth = 0;
+	cheatDefog = cheatTeleport = 0;
 
 	saveflg = loadflg = 0;
 

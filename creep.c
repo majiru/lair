@@ -50,7 +50,8 @@ redrawcreep(Floor *f)
 {
 	int i;
 	for(i = 0; i < f->ncreep; i++)
-		drawtile(f, f->creeps[i]->pos, f->creeps[i]->tile);
+		if(cheatDefog == 1 || f->map[MAPINDEXPT(f, f->creeps[i]->pos)].seen == 1)
+			drawtile(f, f->creeps[i]->pos, f->creeps[i]->tile);
 }
 
 Point

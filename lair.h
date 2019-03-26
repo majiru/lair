@@ -17,6 +17,8 @@
 #define CREEPMAX 100
 #define NUMCREEP 10
 
+#define VIEWDIST 4
+
 #if defined __cplusplus
 extern "C" void p9main(int,char**);
 #endif
@@ -25,9 +27,9 @@ extern "C" void p9main(int,char**);
 #define MAX(a, b) (a) > (b) ? (a) : (b)
 #define MIN(a, b) (a) < (b) ? (a) : (b)
 #define RRANGE(min, max) rand() % ((max) - (min)) + (min)
-#define MAPINDEX(f, x, y) (x) * f->rows + (y)
-#define MAPINDEXPT(f, p) (p.x) * f->rows + (p.y)
-#define PCINDEX(f) f->playpos.x * f->rows + f->playpos.y
+#define MAPINDEX(f, x, y) ((x) * f->rows + (y))
+#define MAPINDEXPT(f, p) ((p.x) * f->rows + (p.y))
+#define PCINDEX(f) (f->playpos.x * f->rows + f->playpos.y)
 
 /* Tile options */
 enum {
@@ -41,6 +43,7 @@ enum {
 	TCreepM,
 	TCreepB,
 	TCreepE,
+	THidden,
 
 	TNUM
 };
@@ -64,6 +67,7 @@ class Tile {
 	public:
 		uchar type;
 		uchar hardness;
+		uchar seen;
 		int pcdistance;
 		int tunneldistance;
 		uchar itemID;
@@ -72,13 +76,13 @@ class Tile {
 /* Floor represents a single 'level' of the map */
 class Floor {
 	public:
-		int 		rows, cols;
+		int 			rows, cols;
 		int			nrooms;
 		Rectangle 	rooms[ROOMNUMMAX];
 		int			ncreep;
 		Creep		*creeps[CREEPMAX];
-		Tile		*map;
-		Point		playpos;
+		Tile			*map;
+		Point			playpos;
 		Image 		*tilesheet;
 };
 
@@ -95,6 +99,9 @@ extern uchar curdepth;
 
 extern Image *black;
 extern Image *white;
+
+extern int cheatDefog;
+extern int cheatTeleport;
 
 /* floor.c */
 Floor*	newfloor(void);
@@ -117,6 +124,7 @@ void	resizefloor(Floor*);
 void	path(Floor*, Rectangle, Rectangle);
 void	assignhardness(Floor*);
 void	drawhardness(Floor*);
+void	discover(Floor*);
 
 
 /* path.c */
@@ -133,6 +141,7 @@ void	tickcreep(Floor*);
 
 /* utility.c */
 int	overlaps(Rectangle, Rectangle);
+int	within(Rectangle, Point);
 int	isbigendian(void);
 
 /* menu.c */

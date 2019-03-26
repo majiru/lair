@@ -99,7 +99,10 @@ drawtile(Floor *f, Point p, uchar tile)
 	min.x = p.x * TILESIZE + screen->r.min.x;
 	min.y = p.y * TILESIZE + screen->r.min.y;
 	max = addpt(min, Pt(TILESIZE, TILESIZE));
-	draw(screen, Rpt(min, max), f->tilesheet, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
+	if(tile == THidden)
+		draw(screen, Rpt(min, max), black, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
+	else
+		draw(screen, Rpt(min, max), f->tilesheet, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
 }
 
 void
@@ -109,7 +112,10 @@ drawfloor(Floor *f)
 
 	for(i = 0; i < f->cols; i++)
 		for(j = 0; j < f->rows; j++)
-			drawtile(f, Pt(i, j), f->map[i*f->rows + j].type);
+			if(cheatDefog == 0 && f->map[i*f->rows + j].seen == 0)
+				drawtile(f, Pt(i, j), THidden);
+			else
+				drawtile(f, Pt(i, j), f->map[i*f->rows + j].type);
 }
 
 Point
@@ -156,8 +162,7 @@ moveentity(Floor *f, Point src, Point dest, uchar tile, int canmine)
 	if(f->map[dest.x * f->rows + dest.y].type == TEmpty)
 		if(canmine == 0 || minewall(f, dest) == 0)
 			return 0;
-	drawtile(f, src, f->map[src.x*f->rows + src.y].type);
-	drawtile(f, dest, tile);
+
 	return 1;
 }
 
@@ -246,6 +251,66 @@ assignhardness(Floor *f)
 					f->map[MAPINDEX(f, i, j)].hardness = RRANGE(1, 254);
 				break;
 			}
+}
+
+/* TODO: Combine this with drawtofloor, taking whole Tile as argument */
+void
+discoverrect(Floor *f, Rectangle r)
+{
+	int i, j;
+
+	for(i = r.min.x; i < r.max.x; i++)
+		for(j = r.min.y; j < r.max.y; j++)
+			f->map[i * f->rows + j].seen = 1;
+}
+
+void
+marknearby(Floor *f, Point p)
+{
+	int i;
+	Point tmp;
+
+	tmp.x = f->playpos.x > p.x ? f->playpos.x - p.x : p.x - f->playpos.x;
+	tmp.y = f->playpos.y > p.y ? f->playpos.y - p.y : p.y - f->playpos.y;
+	if(f->map[MAPINDEXPT(f, tmp)].type == TEmpty)
+		tmp = mulpt(tmp, 2);
+
+	if(tmp.x > VIEWDIST || tmp.y > VIEWDIST)
+		return;
+
+	f->map[MAPINDEXPT(f, p)].seen = 1;
+	for(i = 1; i <= VIEWDIST; ++i){
+		tmp = addpt(p, Pt(0, i));
+		if(f->map[MAPINDEXPT(f, tmp)].seen == 0)
+			marknearby(f, tmp);
+
+		tmp = addpt(p, Pt(i, 0));
+		if(f->map[MAPINDEXPT(f, tmp)].seen == 0)
+			marknearby(f, tmp);
+
+		tmp = subpt(p, Pt(0, i));
+		if(f->map[MAPINDEXPT(f, tmp)].seen == 0)
+			marknearby(f, tmp);
+
+		tmp = subpt(p, Pt(i, 0));
+		if(f->map[MAPINDEXPT(f, tmp)].seen == 0)
+			marknearby(f, tmp);
+	}
+}
+
+void
+discover(Floor *f)
+{
+	int i;
+	Point p;
+	for(i = 0; i < f->nrooms; ++i)
+		if(within(f->rooms[i], f->playpos)){
+			discoverrect(f, Rpt(subpt(f->rooms[i].min, Pt(2,2)), addpt(f->rooms[i].max, Pt(2,2))));
+			return;
+		}
+
+	/* Player must be in a hallway, lets do this the hard way */
+	marknearby(f, f->playpos);
 }
 
 void

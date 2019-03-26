@@ -13,6 +13,13 @@ overlaps(Rectangle r1, Rectangle r2)
 }
 
 int
+within(Rectangle r, Point p)
+{
+	return p.x >= r.min.x && p.x <= r.max.x &&
+		p.y >= r.min.y && p.y <= r.max.y;
+}
+
+int
 isbigendian(void)
 {
 	uint x = 0x76543210;
