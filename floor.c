@@ -91,18 +91,36 @@ drawtofloor(Floor *f, Rectangle r, uchar tile)
 			f->map[i * f->rows + j].type = tile;
 }
 
+Rectangle
+point2tile(Floor *f, Point p)
+{
+	Rectangle r;
+
+	r.min.x = p.x * TILESIZE + screen->r.min.x;
+	r.min.y = p.y * TILESIZE + screen->r.min.y;
+	r.max = addpt(r.min, Pt(TILESIZE, TILESIZE));
+	return r;
+}
+
 void
 drawtile(Floor *f, Point p, uchar tile)
 {
-	Point min, max;
+	Rectangle r;
+	r = point2tile(f, p);
 
-	min.x = p.x * TILESIZE + screen->r.min.x;
-	min.y = p.y * TILESIZE + screen->r.min.y;
-	max = addpt(min, Pt(TILESIZE, TILESIZE));
 	if(tile == THidden)
-		draw(screen, Rpt(min, max), black, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
+		draw(screen, r, black, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
 	else
-		draw(screen, Rpt(min, max), f->tilesheet, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
+		draw(screen, r, f->tilesheet, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
+}
+
+void
+drawstringtile(Floor *f, Point p, char *str)
+{
+	Image *i;
+	Rectangle r = point2tile(f, p);
+	i = f->map[MAPINDEXPT(f, p)].type == TEmpty && f->map[MAPINDEXPT(f, p)].seen == 1 ? black : white;
+	string(screen, r.min, i, r.min, font, str);
 }
 
 void

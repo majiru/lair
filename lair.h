@@ -125,6 +125,7 @@ void	path(Floor*, Rectangle, Rectangle);
 void	assignhardness(Floor*);
 void	drawhardness(Floor*);
 void	discover(Floor*);
+void drawstringtile(Floor*, Point, char*);
 
 
 /* path.c */

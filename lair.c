@@ -46,8 +46,11 @@ eresized(int isnew)
 void
 handleaction(Rune rune)
 {
-	Point dst = curfloor->playpos;
+	static Point dst = {0, 0};
 	Point menudst;
+
+	if(cheatTeleport == 0)
+		dst = curfloor->playpos;
 
 	switch(rune){
 	/* Quit the game */
@@ -86,7 +89,12 @@ handleaction(Rune rune)
 
 	case 't':
 		cheatTeleport = !cheatTeleport;
-		return;
+		/* Landing from teleport, update position */
+		if(cheatTeleport == 0){
+			curfloor->playpos = dst;
+			goto draw;
+		}
+		break;
 
 	/* Movement/Action keys */
 	case '<':
@@ -163,6 +171,10 @@ handleaction(Rune rune)
 		break;
 
 	default:
+		return;
+	}
+	if(cheatTeleport != 0){
+		drawstringtile(curfloor, dst, "*");
 		return;
 	}
 	if(moveentity(curfloor, curfloor->playpos, dst, TPlayer, 0)){
