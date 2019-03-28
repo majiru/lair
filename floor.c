@@ -320,7 +320,6 @@ void
 discover(Floor *f)
 {
 	int i;
-	Point p;
 	for(i = 0; i < f->nrooms; ++i)
 		if(within(f->rooms[i], f->playpos)){
 			discoverrect(f, Rpt(subpt(f->rooms[i].min, Pt(2,2)), addpt(f->rooms[i].max, Pt(2,2))));

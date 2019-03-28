@@ -187,7 +187,6 @@ tickcreep(Floor *f)
 {
 	int i;
 	Point dest;
-	int lowest;
 
 	djikstra(f);
 	djikstratunnel(f);
