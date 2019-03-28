@@ -12,8 +12,7 @@ cplusplus: lair
 
 lair: floor.c lair.c util.c path.c creep.c menu.c
 	$(CC) floor.c lair.c util.c path.c creep.c menu.c
-	$(LD) -o o.lair floor.o lair.o util.o path.o creep.o menu.o
-	mv o.lair lair
+	$(LD) -o lair floor.o lair.o util.o path.o creep.o menu.o
 
 clean:
 	rm -f o.* *.o lair
@@ -24,6 +23,7 @@ vendor:
 	cp $(PLAN9)/include/*.h include/
 	cp $(PLAN9)/bin/9c ./
 	cp $(PLAN9)/bin/9l ./
+	cp $(PLAN9)/bin/devdraw ./
 
 nuke:
 	rm -rf ./lib ./include ./9c ./9l
