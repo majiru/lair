@@ -56,42 +56,43 @@ enum {
 	CErratic =	8,
 };
 
-class Creep {
-	public:
-		uchar type;
-		uchar tile;
-		Point pos;
-};
+typedef
+struct Creep {
+	uchar type;
+	uchar tile;
+	Point pos;
+} Creep;
 
-class Tile {
-	public:
-		uchar type;
-		uchar hardness;
-		uchar seen;
-		int pcdistance;
-		int tunneldistance;
-		uchar itemID;
-};
+typedef
+struct Tile {
+	uchar type;
+	uchar hardness;
+	uchar seen;
+	int pcdistance;
+	int tunneldistance;
+	uchar itemID;
+} Tile;
 
 /* Floor represents a single 'level' of the map */
-class Floor {
-	public:
-		int 			rows, cols;
-		int			nrooms;
-		Rectangle 	rooms[ROOMNUMMAX];
-		int			ncreep;
-		Creep		*creeps[CREEPMAX];
-		Tile			*map;
-		Point			playpos;
-		Image 		*tilesheet;
-};
+typedef
+struct Floor
+{
+	int 		rows, cols;
+	int			nrooms;
+	Rectangle 	rooms[ROOMNUMMAX];
+	int			ncreep;
+	Creep		*creeps[CREEPMAX];
+	Tile		*map;
+	Point		playpos;
+	Image 		*tilesheet;
+} Floor;
 
-class Path{
-	public:
-		HeapNode* n;
-		Point pos, from;
-		int cost;
-};
+typedef
+struct Path{
+	HeapNode* n;
+	Point pos, from;
+	int cost;
+} Path;
 
 extern Floor *curfloor;
 
