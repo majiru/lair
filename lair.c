@@ -98,13 +98,17 @@ handleaction(Rune rune)
 
 	/* Movement/Action keys */
 	case '<':
-		if(curfloor->map[PCINDEX(curfloor)].type == TPortalD)
+		if(curfloor->map[PCINDEX(curfloor)].type == TPortalD){
+			nextfloor(&curfloor);
 			goto draw;
+		}
 		return;
 
 	case '>':
-		if(curfloor->map[PCINDEX(curfloor)].type == TPortalU)
+		if(curfloor->map[PCINDEX(curfloor)].type == TPortalU){
+			nextfloor(&curfloor);
 			goto draw;
+		}
 		return;
 
 	case Khome:
