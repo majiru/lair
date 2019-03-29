@@ -92,7 +92,7 @@ drawtofloor(Floor *f, Rectangle r, uchar tile)
 }
 
 Rectangle
-point2tile(Floor *f, Point p)
+point2tile(Point p)
 {
 	Rectangle r;
 
@@ -106,7 +106,7 @@ void
 drawtile(Floor *f, Point p, uchar tile)
 {
 	Rectangle r;
-	r = point2tile(f, p);
+	r = point2tile(p);
 
 	if(tile == THidden)
 		draw(screen, r, black, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
@@ -118,7 +118,7 @@ void
 drawstringtile(Floor *f, Point p, char *str)
 {
 	Image *i;
-	Rectangle r = point2tile(f, p);
+	Rectangle r = point2tile(p);
 	i = f->map[MAPINDEXPT(f, p)].type == TEmpty && f->map[MAPINDEXPT(f, p)].seen == 1 ? black : white;
 	string(screen, r.min, i, r.min, font, str);
 }
@@ -172,7 +172,7 @@ minewall(Floor *f, Point p)
 
 
 int
-moveentity(Floor *f, Point src, Point dest, uchar tile, int canmine)
+moveentity(Floor *f, Point dest, int canmine)
 {
 	if(isoccupied(f, dest))
 		return 0;

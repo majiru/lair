@@ -40,7 +40,7 @@ eresized(int isnew)
 	drawfloor(curfloor);
 	redrawcreep(curfloor);
 	drawtile(curfloor, curfloor->playpos, TPlayer);
-	resetcur(curfloor);
+	resetcur();
 }
 
 void
@@ -181,7 +181,7 @@ handleaction(Rune rune)
 		drawstringtile(curfloor, dst, "*");
 		return;
 	}
-	if(moveentity(curfloor, curfloor->playpos, dst, TPlayer, 0)){
+	if(moveentity(curfloor, dst, 0)){
 			curfloor->playpos = dst;
 	}
 	tickcreep(curfloor);
@@ -201,8 +201,13 @@ usage(void)
 	exits("usage");
 }
 
+#ifdef __cplusplus
 void
 p9main(int argc, char *argv[])
+#else
+void
+main(int argc, char *argv[])
+#endif
 {
 	Event ev;
 	int e, i;

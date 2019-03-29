@@ -72,6 +72,7 @@ openfile(Floor *f, char *name)
 
 	/* Read size */
 	size = readbe32(fd, &b);
+	USED(size);
 
 	/* Read Player Position */
 	f->playpos = readbept(fd, &b);

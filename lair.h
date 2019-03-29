@@ -19,7 +19,7 @@
 
 #define VIEWDIST 4
 
-#if defined __cplusplus
+#ifdef __cplusplus
 extern "C" void p9main(int,char**);
 #endif
 
@@ -115,7 +115,7 @@ void	drawtofloor(Floor *, Rectangle, uchar);
 void	drawtile(Floor*, Point, uchar);
 Point	randempty(Floor*);
 Point	spawnentity(Floor*, uchar);
-int		moveentity(Floor*, Point, Point, uchar, int);
+int		moveentity(Floor*, Point, int);
 void	drawfloor(Floor*);
 int		additem(Floor*, Point, uchar);
 void	inititems(Floor*);
@@ -148,4 +148,4 @@ int	isbigendian(void);
 
 /* menu.c */
 void	monstermenu(Floor*, Point*);
-void	resetcur(Floor*f);
+void	resetcur(void);

@@ -95,10 +95,8 @@ moveintel(Floor *f, Creep *c)
 			dest = Pt(c->pos.x + 1, c->pos.y - 1);
 		}
 
-		if(f->map[MAPINDEX(f, c->pos.x - 1, c->pos.y + 1)].pcdistance < lowest){
-			lowest = f->map[MAPINDEX(f, c->pos.x - 1, c->pos.y + 1)].pcdistance;
+		if(f->map[MAPINDEX(f, c->pos.x - 1, c->pos.y + 1)].pcdistance < lowest)
 			dest = Pt(c->pos.x - 1, c->pos.y + 1);
-		}
 
 		return dest;
 }
@@ -144,10 +142,8 @@ moveinteltunnel(Floor *f, Creep *c)
 			dest = Pt(c->pos.x + 1, c->pos.y - 1);
 		}
 
-		if(f->map[MAPINDEX(f, c->pos.x - 1, c->pos.y + 1)].tunneldistance < lowest){
-			lowest = f->map[MAPINDEX(f, c->pos.x - 1, c->pos.y + 1)].tunneldistance;
+		if(f->map[MAPINDEX(f, c->pos.x - 1, c->pos.y + 1)].tunneldistance < lowest)
 			dest = Pt(c->pos.x - 1, c->pos.y + 1);
-		}
 
 		return dest;
 }
@@ -204,7 +200,7 @@ tickcreep(Floor *f)
 			if(rand() % 2 == 0)
 				dest = moveerratic(f->creeps[i]);
 
-		if(moveentity(f, f->creeps[i]->pos, dest, f->creeps[i]->tile, (f->creeps[i]->type & CTunnel) != 0) != 0)
+		if(moveentity(f, dest, (f->creeps[i]->type & CTunnel) != 0) != 0)
 			f->creeps[i]->pos = dest;
 	}
 }

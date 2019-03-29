@@ -8,7 +8,7 @@
 static Point cur;
 
 void
-resetcur(Floor *f)
+resetcur(void)
 {
 	Rectangle tmp;
 	tmp.min.x = 0;
