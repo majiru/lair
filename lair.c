@@ -231,6 +231,17 @@ main(int argc, char *argv[])
 				break;
 			}
 
+	lairfmtinstall();
+
+	extern void yyparse(void);
+
+	extern int infd;
+	extern int outfd;
+	outfd = open("/dev/null", OREAD|OWRITE);
+	infd = open("./monster.txt", OREAD);
+	yyparse();
+	exits(nil);
+
 	if(initdraw(nil, nil, "lair") < 0)
 		sysfatal("lair: Failed to init screen %r");
 

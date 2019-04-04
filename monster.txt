@@ -1,0 +1,351 @@
+RLG327 MONSTER DESCRIPTION 1
+
+BEGIN MONSTER
+NAME Junior Barbarian
+SYMB p
+COLOR YELLOW
+DESC
+This is a junior barbarian.  He--or is it she?  You can't tell for sure--
+looks like... it should still be in barbarian school.  The barbarians are 
+putting them in the dungeons young these days.  It's wearing dirty, tattered
+cloth armor and wielding a wooden sword.  You have a hard time feeling
+intimidated.
+.
+SPEED 7+1d4
+DAM 0+1d4
+HP 12+2d6
+ABIL SMART
+RRTY 100
+END
+
+BEGIN MONSTER
+NAME Amazon Lich Queen
+DESC
+She was a powerful Amazon warrior in life.  Death at the hands of the undead
+hordes was followed by her resurrection through dark, necromantic arts.  Her
+power in life didn't approach her undead glory.  Clad in night-black robes
+that don't move in the wind, her incorporeal form commands the power of death
+over life.  You may just be her next victim.  You fear for your soul as you
+quake before her malevolent majesty.
+.
+SYMB p
+COLOR BLACK RED MAGENTA
+ABIL SMART PASS
+DAM 30+5d9
+HP 2999+1d1001
+SPEED 10+10d2
+RRTY 10
+END
+
+BEGIN MONSTER
+NAME Durin's Bane
+DESC
+Nameless Terror, Flame of Udun, Shadow and Flame
+This is a Balrog of Morgoth - Wielding a Fiery whip and flaming sword, a
+hellish beast with a mane and eyes of fire. This creature is responsible
+for the destruction of the great city of Moria. The defeat of this monster
+will avenge the death of countless dwarves, re-establish the wealth and power
+of the Misty Mountains and bring peace to the halls of Khazad-dum.
+.
+SYMB B
+COLOR RED MAGENTA
+SPEED 20+0d1
+ABIL SMART TELE UNIQ
+HP 100+0d1
+DAM 10+2d20
+RRTY 10
+END
+
+BEGIN MONSTER
+NAME Titan
+DESC
+Looming over you at a massive 15 feet tall, weighing nearly a ton, the
+Titan is a force to be reckoned with. A mighty oak club is his weapon of
+choice, but you are all too aware it would take no more than a flick of
+the wrist for him to shatter every bone in your body.
+.
+SYMB M
+COLOR GREEN BLUE
+SPEED 4+2d3
+DAM 25+3d6
+HP 500+2d500
+ABIL SMART TUNNEL
+RRTY 20
+END
+
+BEGIN MONSTER
+NAME Slime
+DESC
+Eww...  It's slimy.
+.
+SYMB s
+COLOR GREEN WHITE CYAN MAGENTA RED YELLOW BLUE
+DAM 0+1d4
+HP 20+0d1
+SPEED 7+1d3
+ABIL TUNNEL ERRATIC
+RRTY 50
+END
+
+BEGIN MONSTER
+SYMB z
+DESC
+The TA says it crashes whenever it runs, but it works fine on *your*
+computer.  It's probably a hardware problem.  It's really, really, really
+annoying.
+.
+SPEED 30+0d1
+COLOR RED
+NAME Software Bug
+DAM 0+0d1
+HP 100000+0d1
+ABIL SMART TELE
+RRTY 100
+END
+
+BEGIN MONSTER
+NAME Hardware Bug
+SPEED 10+0d1
+DAM 10+3d6
+HP 500+2d500
+DESC
+It doesn't actually exist.  See: Software Bug.
+.
+SYMB z
+COLOR BLUE
+ABIL TELE ERRATIC
+RRTY 2
+END
+
+BEGIN MONSTER
+SPEED 25+2d5
+DAM 5+1d6
+HP 50+1d50
+DESC
+It may require a few extra lines of code, but damn is it fast!
+.
+SYMB C
+COLOR GREEN
+NAME C Program
+ABIL SMART
+RRTY 80
+END
+
+BEGIN MONSTER
+SYMB C
+NAME C++ Program
+DESC
+Does in one line what it take 200 lines to do in C, but what's taking so
+long?
+.
+COLOR BLACK
+HP 500+5d100
+SPEED 2+0d1
+DAM 100+9d9
+ABIL SMART TELE TUNNEL
+RRTY 70
+END
+
+BEGIN MONSTER
+SYMB p
+COLOR MAGENTA
+NAME Rory Gilmore
+DESC
+All decked out in a brand new Chilton uniform, she talks faster than anybody
+you've ever known.  She's dual-wielding Proust's "Rememberance of Things
+Past" and a half-empty coffee cup; you'd better watch out or she'll hit you
+with a litany of cultural references from which you'll never recover.
+.
+ABIL SMART ERRATIC UNIQ
+SPEED 50+0d1
+HP 10+1d10
+DAM 0+1d2
+RRTY 40
+END
+
+BEGIN MONSTER
+SYMB p
+COLOR BLUE
+NAME Tsukino Usagi
+DESC
+In our world, she's the youma!  Tsukini kawatte oshioki yo, Sailor Moon!
+.
+ABIL ERRATIC TELE UNIQ
+SPEED 10+0d1
+HP 100+0d1
+DAM 0+3d5
+RRTY 40
+END
+
+BEGIN MONSTER
+SYMB G
+COLOR CYAN
+NAME Casper the Friendly Ghost
+DESC
+Casper, the friendly ghost, 
+The friendliest ghost you know. 
+Though grown-ups might 
+Look at him with fright, 
+The children all love him so. 
+
+He always says hello, 
+and he's really glad to meetcha. 
+Wherever he may go, 
+He's kind to every living creature. 
+
+Grown-ups don't understand 
+Why children love him the most. 
+But kids all know 
+That he loves them so, 
+Casper the friendly ghost.
+.
+ABIL TELE PASS UNIQ
+SPEED 7+1d5
+HP 19+1d11
+DAM 0+1d2
+RRTY 40
+END
+
+BEGIN MONSTER
+SYMB G
+COLOR GREEN
+NAME Slimer
+DESC
+Better call Venkman.  He's covered with ectoplasm, and he wants to eat all
+your food.
+.
+ABIL TELE PASS ERRATIC UNIQ
+SPEED 7+1d5
+HP 19+1d11
+DAM 0+1d2
+RRTY 80
+END
+
+BEGIN MONSTER
+SYMB p
+COLOR WHITE
+NAME David Bowie
+DESC
+He was the human equivalent of a Google search, a portal through which you
+could step into an amazing, very different wider world. He flooded plain
+everyday reality with extraordinary, unexpected information, processing the
+details through a buoyant, mobile mind and made intellectual discovery seem
+incredibly glamorous.
+                       - Joe Coscarelli in the New York Times
+.
+ABIL UNIQ SMART ERRATIC PICKUP UNIQ
+SPEED 15+1d5
+HP 190+5d11
+DAM 9+3d8
+RRTY 30
+END
+
+BEGIN MONSTER
+SYMB S
+COLOR YELLOW
+NAME SpongeBob SquarePants
+DESC
+  "Are you ready, kids?!?!"
+  "I can't hear you!"
+
+He lives in a pineapple under the sea.  He's enormous and yellow and porous.
+And he's tired of flipping Krabby Patties and playing unofficial sidekick and
+the ocean's biggest fan to Mermaid Man.  Each of those billions of pores is
+saturated with soaked-up malevolence, and all of it is focused on you.
+
+SpongeBob rules the dungeons of 327.  He'll coat the dungeon floor with your
+blood and soak it right up to increase his power. 
+.
+ABIL UNIQ ERRATIC DESTROY TUNNEL BOSS
+SPEED 80+0d1
+HP 6666+0d666
+DAM 0+1d4
+RRTY 10
+END
+
+BEGIN MONSTER
+SYMB h
+COLOR YELLOW
+SPEED 6+1d10
+ABIL DESTROY TELE ERRATIC
+HP 200+0d1
+DAM 10000+10d1000
+NAME Grass Mud Horse
+DESC
+This desert-dwelling alpaca relative somehow made it into the dungeon.  Be
+careful!  It packs a powerful punch!
+.
+RRTY 25
+END
+
+BEGIN MONSTER
+SYMB c
+COLOR RED
+SPEED 40+0d1
+ABIL PICKUP TELE SMART
+HP 200+0d1
+DAM 0+0d1
+NAME River Crab
+DESC
+It's a fresh-water crustacean that just wants everybody to get along.
+.
+RRTY 35
+END
+
+BEGIN MONSTER
+SYMB P
+COLOR YELLOW
+SPEED 5+0d1
+ABIL ERRATIC
+HP 10+0d1
+DAM 1+0d1
+NAME Overhead Projector
+DESC
+Some really old skool tech that might go over your head.  It's kind of like 
+Powerpoint, but without computers.  You've probably never seen one before 
+(unless you 1) are old; or 2) have taken a music class).  If you get attacked
+by one of these, make sure to block high.
+
+                                       >
+                                        \
+                                         |
+                                     |---|
+                                     |___|
+
+.
+RRTY 100
+END
+
+BEGIN MONSTER
+SYMB D
+COLOR RED YELLOW
+SPEED 25+0d1
+ABIL PICKUP TELE UNIQ
+HP 20000+0d1
+DAM 0+1d4
+NAME Donald Trump
+DESC
+Watch out!  He'll bludgeon your with a massive orange comb-over while
+spouting nonsense like: "I will build a great wall--and nobody builds walls
+better than me, believe me--and I'll build them very inexpensively. I will
+build a great, great wall on our southern border, and I will make Mexico pay
+for that wall. Mark my words."
+.
+RRTY 20
+END
+
+BEGIN MONSTER
+SYMB W
+COLOR GREEN
+SPEED 15+0d1
+ABIL PICKUP SMART
+HP 20000+0d1
+DAM 10+5d4
+NAME Bruce Willis
+DESC
+He doesn't have any shoes, but he'll mess up your holiday plans.  Yippee
+ki-yay, mother trucker.
+.
+RRTY 50
+END
+

@@ -49,13 +49,44 @@ enum {
 };
 
 /* Creep options */
-enum {
-	CIntel = 	1,
-	CTele = 	2,
-	CTunnel	=	4,
-	CErratic =	8,
-};
+typedef
+enum CreepAbil{
+	CIntel		= 	1,
+	CTele 		= 	2,
+	CTunnel		=	4,
+	CErratic 	=	8,
+	CUniq		=   16,
+	CPass		=	32,
+	CPickup		=	64,
+	CDestroy	=	128,
+	CBoss		=	256,
+} CreepAbil;
 
+typedef
+struct Dice {
+	int base;
+	int ndie;
+	int nside;
+
+	/* Stores last role, useful for one time calc */
+	int last;
+} Dice;
+
+typedef
+struct CreepLex {
+	char *name;
+	char *desc;
+	char *color;
+	char tile;
+	Dice *speed;
+	Dice *dam;
+	Dice *HP;
+	CreepAbil type;
+	int rarity;
+} CreepLex;
+
+
+/* TODO: Refactor to use pointer to CreepLex */
 typedef
 struct Creep {
 	uchar type;
@@ -142,10 +173,18 @@ void	redrawcreep(Floor*);
 void	tickcreep(Floor*);
 
 /* utility.c */
-int	overlaps(Rectangle, Rectangle);
-int	within(Rectangle, Point);
-int	isbigendian(void);
+int		overlaps(Rectangle, Rectangle);
+int		within(Rectangle, Point);
+int		isbigendian(void);
+void	roledir(Dice*);
+Dice*	str2dice(char*);
 
 /* menu.c */
 void	monstermenu(Floor*, Point*);
 void	resetcur(void);
+
+/* fmt.c */
+#pragma varargck type "D" Dice*
+#pragma varargck type "U" CreepAbil
+#pragma varargck type "C" CreepLex*
+void	lairfmtinstall(void);

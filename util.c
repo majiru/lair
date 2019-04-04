@@ -30,3 +30,32 @@ isbigendian(void)
 
 	return 1;
 }
+
+void
+roledie(Dice *d)
+{
+	int i;
+	d->last = d->base;
+	for(i = 0; i < d->ndie; ++i)
+		d->last += RRANGE(1, d->nside);
+}
+
+Dice*
+str2dice(char *str)
+{
+	char *fields[3];
+	Dice *d = mallocz(sizeof(Dice), 1);
+	int n;
+
+	n = getfields(str, fields, 3, 0, "+d");
+	if(n != 3)
+		return nil;
+
+	d->base = atoi(fields[0]);
+	d->ndie = atoi(fields[1]);
+	d->nside = atoi(fields[2]);
+
+	roledie(d);
+
+	return d;
+}
