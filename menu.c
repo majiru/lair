@@ -31,7 +31,7 @@ monstermenu(Floor *f, Point *p)
 	menu.min.x = 0;
 	menu.min.y = Dy(screen->r) - 250;
 	menu.min = addpt(menu.min, screen->r.min);
-	menu.max = addpt(menu.min, Pt(250, 250));
+	menu.max = addpt(menu.min, Pt(300, 300));
 
 	if(initialized == 0){
 		cur = menu.min;
@@ -63,8 +63,8 @@ monstermenu(Floor *f, Point *p)
 		}else
 			cardinal[1] = "sorth";
 
-		draw(screen, Rpt(drawpos, addpt(drawpos, Pt(TILESIZE, TILESIZE))), f->tilesheet, nil, Pt(TILESIZE * f->creeps[i]->tile, (curdepth % PALETTENUM) * TILESIZE));
-		snprint(buf, 256, "Creep %d: %d %s, %d %s", i, tmp.x, cardinal[0], tmp.y, cardinal[1]);
+		draw(screen, Rpt(drawpos, addpt(drawpos, Pt(TILESIZE, TILESIZE))), f->tilesheet, nil, Pt(TILESIZE * f->creeps[i]->info->tile, (curdepth % PALETTENUM) * TILESIZE));
+		snprint(buf, 256, "%s: %d %s, %d %s", f->creeps[i]->info->name, tmp.x, cardinal[0], tmp.y, cardinal[1]);
 		string(screen, addpt(drawpos, Pt(TILESIZE, 0)), black, addpt(drawpos, Pt(TILESIZE, 0)), font, buf);
 	}
 }

@@ -23,25 +23,26 @@ isoccupied(Floor *f, Point p)
 void
 spawncreep(Floor *f)
 {
-	int i;
+	int i, n;
 	Creep *c;
-	for(i = 0; i < NUMCREEP; i++){
+	CreepLex *l;
+
+	for(i = NUMCREEP; i > 0;){
+		l = creeplexicon[RRANGE(0, ncreeplex)];
+		n = RRANGE(0, 100);
+		if(n >= l->rarity)
+			continue;
+
+		if(l->spawned != 0 && ((l->type & CUniq) == CUniq))
+			continue;
+
+		l->spawned = 1;
+
 		c = mallocz(sizeof(Creep), 1);
-		if(rand() % 2 == 0)
-			c->type |= CIntel;
-
-		if(rand() % 2 == 0)
-			c->type |= CTele;
-
-		if(rand() % 2 == 0)
-			c->type |= CTunnel;
-
-		if(rand() % 2 == 0)
-			c->type |= CErratic;
-
-		c->tile = RRANGE(TCreep, TCreepE);
-		c->pos = spawnentity(f, c->tile);
+		c->info = l;
+		c->pos = spawnentity(f, c->info->tile);
 		f->creeps[f->ncreep++] = c;
+		--i;
 	}
 }
 
@@ -51,7 +52,7 @@ redrawcreep(Floor *f)
 	int i;
 	for(i = 0; i < f->ncreep; i++)
 		if(cheatDefog == 1 || f->map[MAPINDEXPT(f, f->creeps[i]->pos)].seen == 1)
-			drawtile(f, f->creeps[i]->pos, f->creeps[i]->tile);
+			drawtile(f, f->creeps[i]->pos, f->creeps[i]->info->tile);
 }
 
 Point
@@ -188,19 +189,19 @@ tickcreep(Floor *f)
 	djikstratunnel(f);
 
 	for(i = 0; i < f->ncreep; i++){
-		if((f->creeps[i]->type & CIntel) != 0){
-			if((f->creeps[i]->type & CTunnel) != 0)
+		if((f->creeps[i]->info->type & CIntel) == CIntel){
+			if((f->creeps[i]->info->type & CTunnel) == CTunnel)
 				dest = moveinteltunnel(f, f->creeps[i]);
 			else
 				dest = moveintel(f, f->creeps[i]);
 		}else
 			dest = movedumb(f, f->creeps[i]);
 
-		if((f->creeps[i]->type & CErratic) != 0)
+		if((f->creeps[i]->info->type & CErratic) == CErratic)
 			if(rand() % 2 == 0)
 				dest = moveerratic(f->creeps[i]);
 
-		if(moveentity(f, dest, (f->creeps[i]->type & CTunnel) != 0) != 0)
+		if(moveentity(f, dest, (f->creeps[i]->info->type & CTunnel) == CTunnel) != 0)
 			f->creeps[i]->pos = dest;
 	}
 }

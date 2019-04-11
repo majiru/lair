@@ -20,6 +20,20 @@ freefloor(Floor *f, int freesheet)
 }
 
 void
+initportal(Floor *f)
+{
+	int i;
+	for(i = 0; i < PORTALMAX / 2; i++){
+		f->stairs[i].pos = randempty(f);
+		f->stairs[i].tile = TPortalD;
+	}
+	for(i = 2; i < PORTALMAX; i++){
+		f->stairs[i].pos = randempty(f);
+		f->stairs[i].tile = TPortalU;
+	}
+}
+
+void
 initmap(Floor *f)
 {
 	int i;
@@ -29,7 +43,6 @@ initmap(Floor *f)
 	for(i = 0; i < f->nrooms; i++)
 		drawtofloor(f, f->rooms[i], TRoom);
 
-	inititems(f);
 	assignhardness(f);
 }
 
@@ -38,6 +51,8 @@ initfloor(Floor *f)
 {
 	initrooms(f);
 	initmap(f);
+	initportal(f);
+	inititems(f);
 	f->playpos = spawnentity(f, TPlayer);
 	spawncreep(f);
 }
@@ -187,11 +202,35 @@ moveentity(Floor *f, Point dest, int canmine)
 void
 inititems(Floor *f)
 {
+	int i, n;
+	Item *it;
+	ItemLex *l;
+
+	for(i = ITEMMAX; i > 0;){
+		l = itemlexicon[RRANGE(0, nitemlex)];
+		n = RRANGE(0, 100);
+		if(n >= l->rarity)
+			continue;
+
+		it = mallocz(sizeof(Item), 1);
+		it->info = l;
+		it->pos = randempty(f);
+		f->items[f->nitem++] = it;
+		--i;
+	}
+}
+
+void
+redrawitem(Floor *f)
+{
 	int i;
-	for(i = 0; i < PORTALMAX / 2; i++)
-		drawtotile(f, randempty(f), TPortalD);
-	for(i = 0; i < PORTALMAX / 2; i++)
-		drawtotile(f, randempty(f), TPortalU);
+	for(i = 0; i < PORTALMAX; i++)
+		if(cheatDefog == 1 || f->map[MAPINDEXPT(f, f->stairs[i].pos)].seen == 1)
+			drawtile(f, f->stairs[i].pos, f->stairs[i].tile);
+	for(i = 0; i < f->nitem; i++)
+		if(cheatDefog == 1 || f->map[MAPINDEXPT(f, f->items[i]->pos)].seen == 1)
+			drawtile(f, f->items[i]->pos, f->items[i]->info->type);
+
 }
 
 int
@@ -370,4 +409,14 @@ resizefloor(Floor *f)
 
 	f->rows = newrows;
 	f->cols = newcols;
+}
+
+uchar
+isonstair(Floor *f)
+{
+	int i;
+	for(i = 0; i < PORTALMAX; i++)
+		if(eqpt(f->stairs[i].pos, f->playpos))
+			return f->stairs[i].tile;
+	return 0;
 }

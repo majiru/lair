@@ -11,8 +11,8 @@
 %a 10000
 
 %%
-RLG327\ MONSTER\ DESCRIPTION\ 1					/* Ignore version info */;
-^BEGIN\ MONSTER\n								{ BEGIN(thing); return TokBegin; }
+RLG327\ (MONSTER|OBJECT)\ DESCRIPTION\ 1		/* Ignore version info */;
+^BEGIN\ (MONSTER|OBJECT)\n						{ BEGIN(thing); yylval.str = strdup(yytext); return TokBegin; }
 ^END											{ BEGIN(INITIAL); return TokEnd;}
 ^DESC\n											{ BEGIN(desc); yylval.str = strdup(yytext); return TokKey; }
 <desc>^"."										{ BEGIN(thing); return ';';}
@@ -21,7 +21,7 @@ RLG327\ MONSTER\ DESCRIPTION\ 1					/* Ignore version info */;
 ^[A-Z]+											{ yylval.str = strdup(yytext); return TokKey; }
 [0-9]+"+"[0-9]+d[0-9]+							{ yylval.d = str2dice(strdup(yytext)); return TokDice; }
 <thing>[0-9]+									{ yylval.num = atoi(yytext); return TokInt; }
-[A-Za-z0-9]+									{ yylval.str = strdup(yytext); return TokStr; }
+[A-Za-z0-9"()"\+]+								{ yylval.str = strdup(yytext); return TokStr; }
 <thing>\n										return ';';
 \n												/* Ignore newlines outside of blocks */;
 [ \t]+											/* nop */;

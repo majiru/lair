@@ -1,8 +1,7 @@
 /* Graphical Options */
 #define TILESIZE 16
-#define TILEBORDER 1
 
-#define PALETTENUM 3
+#define PALETTENUM 4
 
 #define ROOMNUMMAX 20
 #define ROOMMINX 4
@@ -15,7 +14,9 @@
 #define ITEMMAX 10
 
 #define CREEPMAX 100
-#define NUMCREEP 10
+#define NUMCREEP 25
+
+#define MAXLEXICON 32
 
 #define VIEWDIST 4
 
@@ -39,16 +40,56 @@ enum {
 	TPlayer,
 	TPortalD,
 	TPortalU,
-	TCreep,
-	TCreepM,
-	TCreepB,
-	TCreepE,
-	THidden,
 
-	TNUM
+	TGENERICMAX
 };
 
-/* Creep options */
+/* Creep Tile Options */
+enum {
+	TCreep = TGENERICMAX,
+	TCreepA,
+	TCreepB,
+	TCreepC,
+	TCreepD,
+	TCreepE,
+	TCreepF,
+	TCreepG,
+	TCreepH,
+	TCreepI,
+	TCreepJ,
+	TCreepK,
+	TCreepL,
+	TCreepM,
+	TCreepN,
+	TCreepO,
+	TCreepP,
+
+	TCREEPMAX
+
+};
+
+/* Item Options */
+enum {
+	IArmor = TCREEPMAX,
+	ICloak,
+	IRing,
+	IAmulet,
+	IBoots,
+	IHelmet,
+	IGloves,
+	ILight,
+	IWeapon,
+	IOffhand,
+
+	IMAX
+};
+
+/* Special Tiles that do not have a place in the tilesheet */
+enum {
+	THidden = 250
+};
+
+/* Creep ability options */
 typedef
 enum CreepAbil{
 	CIntel		= 	1,
@@ -69,7 +110,7 @@ struct Dice {
 	int nside;
 
 	/* Stores last role, useful for one time calc */
-	int last;
+	int last; 
 } Dice;
 
 typedef
@@ -77,22 +118,53 @@ struct CreepLex {
 	char *name;
 	char *desc;
 	char *color;
-	char tile;
+	uchar tile;
 	Dice *speed;
 	Dice *dam;
 	Dice *HP;
 	CreepAbil type;
 	int rarity;
+	int spawned;
 } CreepLex;
 
+typedef
+struct ItemLex {
+	char *name;
+	char *desc;
+	char *color;
+	uchar type;
+	Dice *weight;
+	Dice *dam;
+	Dice *hit;
+	Dice *attr;
+	Dice *val;
+	Dice *dodge;
+	Dice *def;
+	Dice *speed;
+	int rarity;
+	char art;
+} ItemLex;
 
-/* TODO: Refactor to use pointer to CreepLex */
+
+/* TODO: Maybe refactor into union */
 typedef
 struct Creep {
-	uchar type;
+	CreepLex	*info;
+	Point 		pos;
+} Creep;
+
+typedef
+struct Item {
+	ItemLex *info;
+	Point	pos;
+} Item;
+
+
+typedef
+struct Portal {
 	uchar tile;
 	Point pos;
-} Creep;
+} Portal;
 
 typedef
 struct Tile {
@@ -113,8 +185,11 @@ struct Floor
 	Rectangle 	rooms[ROOMNUMMAX];
 	int			ncreep;
 	Creep		*creeps[CREEPMAX];
+	int			nitem;
+	Item		*items[ITEMMAX];
 	Tile		*map;
 	Point		playpos;
+	Portal		stairs[PORTALMAX];
 	Image 		*tilesheet;
 } Floor;
 
@@ -125,6 +200,8 @@ struct Path{
 	int cost;
 } Path;
 
+
+/* Declared in lair.c */
 extern Floor *curfloor;
 
 extern uchar curdepth;
@@ -134,6 +211,14 @@ extern Image *white;
 
 extern int cheatDefog;
 extern int cheatTeleport;
+
+
+/* Declared in monster.y */
+extern CreepLex *creeplexicon[MAXLEXICON];
+extern ItemLex *itemlexicon[MAXLEXICON];
+extern int ncreeplex;
+extern int nitemlex;
+
 
 /* floor.c */
 Floor*	newfloor(void);
@@ -157,7 +242,9 @@ void	path(Floor*, Rectangle, Rectangle);
 void	assignhardness(Floor*);
 void	drawhardness(Floor*);
 void	discover(Floor*);
-void drawstringtile(Floor*, Point, char*);
+void 	drawstringtile(Floor*, Point, char*);
+void	redrawitem(Floor*);
+uchar	isonstair(Floor*);
 
 
 /* path.c */

@@ -10,12 +10,16 @@
 char *buttons[] = {"exit", 0};
 Menu menu = {buttons};
 
+/* Flag for user control to tell us if we are in the monster menu */
 int inmenu;
 
+/* Our current floor */
 Floor *curfloor;
 
+/* How many floors has the user gone? */
 uchar curdepth;
 
+/* BUG: Plan9port doesn't like display->black and display->white */
 Image *black;
 Image *white;
 
@@ -33,12 +37,12 @@ eresized(int isnew)
 	if(curfloor->nrooms == 0)
 		initfloor(curfloor);
 	else
-		/*BUG: This causes resize to 'move' the objectives */
 		initmap(curfloor);
 
 	discover(curfloor);
 	drawfloor(curfloor);
 	redrawcreep(curfloor);
+	redrawitem(curfloor);
 	drawtile(curfloor, curfloor->playpos, TPlayer);
 	resetcur();
 }
@@ -98,14 +102,14 @@ handleaction(Rune rune)
 
 	/* Movement/Action keys */
 	case '<':
-		if(curfloor->map[PCINDEX(curfloor)].type == TPortalD){
+		if(isonstair(curfloor) == TPortalD){
 			nextfloor(&curfloor);
 			goto draw;
 		}
 		return;
 
 	case '>':
-		if(curfloor->map[PCINDEX(curfloor)].type == TPortalU){
+		if(isonstair(curfloor) == TPortalU){
 			nextfloor(&curfloor);
 			goto draw;
 		}
@@ -190,6 +194,7 @@ draw:
 	discover(curfloor);
 	drawfloor(curfloor);
 	redrawcreep(curfloor);
+	redrawitem(curfloor);
 	drawtile(curfloor, curfloor->playpos, TPlayer);
 
 }
@@ -240,7 +245,12 @@ main(int argc, char *argv[])
 	outfd = open("/dev/null", OREAD|OWRITE);
 	infd = open("./monster.txt", OREAD);
 	yyparse();
-	exits(nil);
+	close(infd);
+
+	infd = open("./object.txt", OREAD);
+	yyparse();
+	close(infd);
+	close(outfd);
 
 	if(initdraw(nil, nil, "lair") < 0)
 		sysfatal("lair: Failed to init screen %r");
