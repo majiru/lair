@@ -1,0 +1,370 @@
+RLG327 OBJECT DESCRIPTION 1
+
+BEGIN OBJECT
+NAME a NERF(R) dagger
+TYPE WEAPON
+COLOR MAGENTA
+WEIGHT 1+0d1
+HIT 0+0d1
+DAM 0+0d1
+ATTR 0+0d1
+VAL 9+1d6
+DODGE 10+0d1
+DEF 0+0d1
+SPEED 0+0d1
+DESC
+This is a totally wicked looking dagger.  It's got awesome barbs on the back
+of the blade, a compass on the hilt, and myriad other embellishments that
+serve no functional purpose.  You could totally be a deadly assassin with a
+sweet blade like this.  Since it's so light, it won't encumber you.  It's
+made out of polyurethane foam.
+.
+RRTY 90
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME the Vorpal Blade
+DESC
+One, two! One, two! And through and through!
+It goes snicker-snack.
+.
+TYPE WEAPON
+COLOR RED
+WEIGHT 15+0d1
+HIT 12+3d4
+ATTR 0+0d1
+VAL 198+2d51
+DAM 314+15d92
+DODGE 0+0d1
+DEF 0+0d1
+SPEED 20+0d5
+RRTY 10
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME a prom dress
+HIT 0+2d3
+DAM 0+2d3
+DODGE 0+0d1
+SPEED -5+0d1
+ATTR 0+0d1
+VAL 449+0d1
+DEF 0+0d1
+DESC
+This dress is totes fab! It's off-the-shoulder with an A-line waste, sequins,
+and lavender chiffon.  It fits tight to mid-calf and you totally can't take
+full steps in it, but, like, who cares?  You'll be the hit of the party as
+long as Shirley doesn't show up wearing the same thing again.
+.
+TYPE ARMOR
+COLOR MAGENTA
+WEIGHT 0+2d2
+RRTY 70
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME a pair of Prada dress sandals
+HIT 0+0d1
+DAM 0+3d10
+DODGE 0+0d1
+SPEED -5+0d1
+ATTR 0+0d1
+VAL 449+0d1
+DEF 0+0d1
+DESC
+You'll be the belle of the prom in these Prada dress sandals.  The 3" spike
+heel makes you a bit unsteady, but they look like they could cause some 
+major damage.
+.
+TYPE BOOTS
+COLOR MAGENTA
+WEIGHT 0+2d2
+RRTY 80
+ART FALSE
+END
+
+
+BEGIN OBJECT
+NAME a chainmail coif
+WEIGHT 8+0d1
+HIT 0+0d1
+DAM 0+0d1
+ATTR 0+0d1
+DODGE 0+0d1
+VAL 48+2d11
+DEF 10+2d6
+SPEED 0+0d1
+DESC
+A heavy chainmail head covering.
+.
+TYPE HELMET
+COLOR BLACK
+RRTY 100
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME the Aegis
+DESC
+A very high-quality shield.  Nobody knows what it looks like, except for
+maybe--now--you, but you're not telling.  The back side is inscribed with the
+words: "If found, please return to Zeus, Mount Olympus".
+.
+TYPE OFFHAND
+WEIGHT 3+0d1
+HIT 0+0d1
+DAM 0+0d1
+VAL 17000+0d1
+DODGE 20+2d8
+ATTR 0+0d1
+DEF 20+3d8
+SPEED 10+0d1
+COLOR YELLOW
+RRTY 30
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME the cloak of invisibility
+TYPE CLOAK
+VAL 10000+5d1000
+DESC
+One of the Deathly Hallows, this cloak grants the wearer invisibility.  Last
+know to be the property of the Boy Who Lived.
+.
+WEIGHT 1+0d1
+DODGE 24+5d4
+DEF 0+0d1
+HIT 0+0d1
+ATTR 0+0d1
+DAM 0+0d1
+SPEED 0+0d1
+COLOR CYAN
+RRTY 20
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME the One Ring
+TYPE RING
+WEIGHT 1+0d1
+COLOR YELLOW
+DODGE 50+6d8
+VAL 1000000+2d1000000
+DEF 50+6d8
+ATTR 0+0d1
+HIT 10+2d5
+DAM 10+12d55
+SPEED 25+5d5
+DESC
+The One Ring to rule them all... and in the darkness bind them.  Created by
+Sauron as a tool in his quest to dominate Middle Earth.  It draws the dark
+sorcerer's eye upon its wearer.
+.
+RRTY 3
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME a torch
+TYPE LIGHT
+WEIGHT 2+1d2
+COLOR BLACK
+DODGE 0+0d1
+VAL 0+1d3
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+A short wooden stick topped with an oil-soaked cloth, perfect for lighting
+your way through the dungeon.
+.
+ATTR 0+1d3
+RRTY 100
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME a Wicked Lasers(R) Torch
+TYPE LIGHT
+WEIGHT 1+1d2
+COLOR BLACK
+DODGE 0+0d1
+VAL 199+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+From the makers of the world's most refined lasers, comes the ultimate in
+handheld flashlights. The Flashtorch is a compact, portable searchlight that
+is capable of producing an incredible 4100 lumens of intense white light. Use
+this power to guide your way home, light a fire, or even fry an egg!
+.
+ATTR 200+0d1
+RRTY 30
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME the Moon Tiara
+TYPE HELMET
+WEIGHT 1+1d2
+COLOR WHITE
+DODGE 10+0d1
+VAL 199+0d1
+DAM 0+0d1
+DEF 100+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+Sailor Moon's Moon Tiara.  Maybe you can use it to do Moon Tiara Action?  But
+she's probably looking for it.
+.
+ATTR 200+0d1
+RRTY 35
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME the Moon Stick
+TYPE OFFHAND
+WEIGHT 1+1d2
+COLOR MAGENTA
+DODGE 10+0d1
+VAL 199+0d1
+DAM 25+0d1
+DEF 100+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+Sailor Moon's Moon Stick.  Maybe you can use it to do Moon Princess Halation?
+But she's probably looking for it.
+.
+ATTR 200+0d1
+RRTY 25
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME a ring of speed
+TYPE RING
+WEIGHT 1+0d1
+COLOR RED
+DODGE 0+0d1
+VAL 1000+0d1
+DAM 0+0d1
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+1d40
+DESC
+Not only is it stylish, but it will let you move faster.
+.
+ATTR 0+0d1
+RRTY 80
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME a ring of damage
+TYPE RING
+WEIGHT 1+0d1
+COLOR CYAN
+DODGE 0+0d1
+VAL 1000+0d1
+DAM 25+10d50
+DEF 0+0d1
+HIT 0+0d1
+SPEED 0+0d1
+DESC
+Not only does it look great, but it will let you hit harder.
+.
+ATTR 0+0d1
+RRTY 80
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME Mjolnir
+TYPE WEAPON
+WEIGHT 1000+0d1
+COLOR GREEN
+DODGE 10+10d10
+VAL 19900+0d1
+DAM 10+500d10
+DEF 100+0d1
+HIT 100+0d1
+SPEED 10+0d1
+DESC
+The hammer of Thor, one of the most fearsome and powerful weapons in
+existence, capable of leveling mountains.
+.
+ATTR 10+0d1
+RRTY 50
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME Sting
+TYPE WEAPON
+WEIGHT 10+0d1
+COLOR BLUE
+DODGE 0+0d1
+VAL 300+0d1
+DAM 10+15d30
+DEF 10+0d1
+HIT 10+0d1
+SPEED 5+0d1
+DESC
+A magical, elven blade, it glows blue when orcs are near.
+.
+ATTR 10+0d1
+RRTY 80
+ART TRUE
+END
+
+BEGIN OBJECT
+NAME fingerless gloves
+TYPE GLOVES
+WEIGHT 2+0d1
+COLOR GREEN
+DODGE 0+0d1
+VAL 3+0d1
+DAM 0+0d1
+DEF 10+0d1
+HIT 10+0d1
+SPEED 0+0d1
+DESC
+Put these on and you'll be bad like Michael Jackson.
+.
+ATTR 0+0d1
+RRTY 80
+ART FALSE
+END
+
+BEGIN OBJECT
+NAME the Heart of the Ocean
+TYPE AMULET
+WEIGHT 2+0d1
+COLOR BLUE
+DODGE 0+0d1
+VAL 20000000+0d1
+DAM 20+10d2
+DEF 10+0d1
+HIT 10+0d1
+SPEED 10+0d1
+DESC
+A 56 carat diamond was originally owned by Louis XVI and cut into a heart
+shape after the French Revolution.  Last known whereabouts: Bottom of the
+Atlantic Ocean (thanks, Rose).  Little did she know, it's imbued with
+fantastic magical powers!
+.
+ATTR 0+0d1
+RRTY 80
+ART TRUE
+END
+
