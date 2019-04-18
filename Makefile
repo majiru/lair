@@ -2,6 +2,7 @@ CC := 9c
 LD := 9l
 YACC := yacc
 LEX := lex
+LIBNUKLEAR := ../../libnuklear
 
 NOP9P: export PLAN9 = .
 NOP9P: export CC = ./9c
@@ -17,11 +18,11 @@ cplusplus: lair
 lair: floor.c lair.c util.c path.c creep.c menu.c
 	$(YACC) -d monster.y
 	$(LEX) -9 monster.l
-	$(CC) floor.c lair.c util.c path.c creep.c menu.c fmt.c lex.yy.c y.tab.c
-	$(LD) -o lair floor.o lair.o util.o path.o creep.o menu.o fmt.o lex.yy.o y.tab.o
+	$(CC) floor.c lair.c util.c path.c creep.c menu.c fmt.c item.c nuklear.c lex.yy.c y.tab.c
+	$(LD) -o lair floor.o lair.o util.o path.o creep.o menu.o fmt.o item.o nuklear.o lex.yy.o y.tab.o
 
 clean:
-	rm -f o.* *.o lair y.tab.c yy.lex.c y.tab.h
+	rm -f o.* *.o lair y.tab.c lex.yy.c y.tab.h
 
 vendor:
 	mkdir -p lib include
@@ -34,6 +35,9 @@ vendor:
 	cp $(PLAN9)/bin/devdraw ./
 	cp $(PLAN9)/bin/lex ./
 	cp $(PLAN9)/bin/yacc ./
+	cp $(LIBNUKLEAR)/nuklear.c ./
+	cp $(LIBNUKLEAR)/nuklear.h ./
+
 
 nuke:
-	rm -rf ./lib ./include ./9c ./9l ./devdraw ./lex ./yacc
+	rm -rf ./lib ./include ./9c ./9l ./devdraw ./lex ./yacc ./nuklear.*

@@ -1,21 +1,64 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <memdraw.h>
+#include <event.h>
+#include <nuklear.h>
 #include <heap.h>
 
 #include "lair.h"
 
+Creep*
+point2creep(Floor *f, Point p)
+{
+	int i;
+	for(i = 0; i < f->ncreep; i++)
+		if(eqpt(f->creeps[i]->pos, p))
+			return f->creeps[i];
+
+	return nil;
+}
+
+void
+docombat(Creep *player, Creep *creep)
+{
+	List *cur, *start;
+	int dam = RRANGE(1, 5);
+
+	start = cur = curfloor->player->equipment;
+
+	for(cur = cur->next; cur != start; cur = cur->next)
+		dam += ((ItemLex*)cur->datum)->dam->last;
+
+	creep->health -= dam;
+
+	player->health -= creep->info->dam->last;
+
+	if(player->health < 0){
+		sysfatal("You lost...");
+	}
+
+	if((creep->info->type & CBoss) == CBoss && creep->health < 0)
+		sysfatal("You Won!");
+}
+
 int
-isoccupied(Floor *f, Point p)
+isoccupied(Floor *f, Point p, Creep *c)
 {
 	int i;
 
-	if(eqpt(f->playpos, p))
+	if(eqpt(f->player->pos, p)){
+		docombat(f->player, c);
 		return 1;
+	}
 
 	for(i = 0; i < f->ncreep; i++)
-		if(eqpt(f->creeps[i]->pos, p))
+		if(eqpt(f->creeps[i]->pos, p) && f->creeps[i]->health > 0){
+			/* Hacky way to check if c is player */
+			if(c->info == nil)
+				docombat(c, f->creeps[i]);
 			return 1;
+		}
 
 	return 0;
 }
@@ -42,6 +85,8 @@ spawncreep(Floor *f)
 		c->info = l;
 		c->pos = spawnentity(f, c->info->tile);
 		f->creeps[f->ncreep++] = c;
+		c->health = c->info->HP->last;
+		roledie(c->info->HP);
 		--i;
 	}
 }
@@ -51,6 +96,7 @@ redrawcreep(Floor *f)
 {
 	int i;
 	for(i = 0; i < f->ncreep; i++)
+		if(f->creeps[i]->health > 0)
 		if(cheatDefog == 1 || f->map[MAPINDEXPT(f, f->creeps[i]->pos)].seen == 1)
 			drawtile(f, f->creeps[i]->pos, f->creeps[i]->info->tile);
 }
@@ -155,7 +201,7 @@ movedumb(Floor *f, Creep *c)
 	Point dst = c->pos;
 	Point tmp;
 
-	tmp = subpt(f->playpos, dst);
+	tmp = subpt(f->player->pos, dst);
 
 	if(tmp.x > 0)
 		dst = addpt(dst, Pt(1,0));
@@ -189,6 +235,8 @@ tickcreep(Floor *f)
 	djikstratunnel(f);
 
 	for(i = 0; i < f->ncreep; i++){
+		if(f->creeps[i]->health < 0)
+			continue;
 		if((f->creeps[i]->info->type & CIntel) == CIntel){
 			if((f->creeps[i]->info->type & CTunnel) == CTunnel)
 				dest = moveinteltunnel(f, f->creeps[i]);
@@ -201,7 +249,7 @@ tickcreep(Floor *f)
 			if(rand() % 2 == 0)
 				dest = moveerratic(f->creeps[i]);
 
-		if(moveentity(f, dest, (f->creeps[i]->info->type & CTunnel) == CTunnel) != 0)
+		if(moveentity(f, dest, (f->creeps[i]->info->type & CTunnel) == CTunnel, f->creeps[i]) != 0)
 			f->creeps[i]->pos = dest;
 	}
 }

@@ -1,6 +1,9 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <memdraw.h>
+#include <event.h>
+#include <nuklear.h>
 #include <mp.h>
 #include <heap.h>
 
@@ -75,7 +78,7 @@ openfile(Floor *f, char *name)
 	USED(size);
 
 	/* Read Player Position */
-	f->playpos = readbept(fd, &b);
+	f->player->pos = readbept(fd, &b);
 
 	/* These files are built for ncurses
 	* Meaning they are for 80x21 by default. Gross.

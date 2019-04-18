@@ -1,5 +1,8 @@
 %{
 #include <draw.h>
+#include <memdraw.h>
+#include <event.h>
+#include <nuklear.h>
 #include <heap.h>
 
 #include "lair.h"

@@ -30,7 +30,17 @@ extern "C" void p9main(int,char**);
 #define RRANGE(min, max) rand() % ((max) - (min)) + (min)
 #define MAPINDEX(f, x, y) ((x) * f->rows + (y))
 #define MAPINDEXPT(f, p) ((p.x) * f->rows + (p.y))
-#define PCINDEX(f) (f->playpos.x * f->rows + f->playpos.y)
+#define PCINDEX(f) (f->player->pos.x * f->rows + f->player->pos.y)
+
+enum {
+	ItemMenuWear = 1,
+	ItemMenuRemove,
+	ItemMenuDrop,
+	ItemMenuDel,
+	ItemMenuInv,
+	ItemMenuEquip,
+	ItemMenuInspect,
+};
 
 /* Tile options */
 enum {
@@ -63,6 +73,7 @@ enum {
 	TCreepN,
 	TCreepO,
 	TCreepP,
+	TCreepQ,
 
 	TCREEPMAX
 
@@ -87,6 +98,15 @@ enum {
 /* Special Tiles that do not have a place in the tilesheet */
 enum {
 	THidden = 250
+};
+
+/* TODO: Move this into it's own thing */
+typedef struct List List;
+
+struct
+List {
+	List *next, *prev;
+	void *datum;
 };
 
 /* Creep ability options */
@@ -150,13 +170,17 @@ struct ItemLex {
 typedef
 struct Creep {
 	CreepLex	*info;
+	List		*equipment;
+	List		*inventory;
 	Point 		pos;
+	int 		health;
 } Creep;
 
 typedef
 struct Item {
 	ItemLex *info;
 	Point	pos;
+	int		pickedup;
 } Item;
 
 
@@ -188,9 +212,9 @@ struct Floor
 	int			nitem;
 	Item		*items[ITEMMAX];
 	Tile		*map;
-	Point		playpos;
 	Portal		stairs[PORTALMAX];
 	Image 		*tilesheet;
+	Creep		*player;	/* Mankind truly is the worst enemy of them all */
 } Floor;
 
 typedef
@@ -199,7 +223,6 @@ struct Path{
 	Point pos, from;
 	int cost;
 } Path;
-
 
 /* Declared in lair.c */
 extern Floor *curfloor;
@@ -231,7 +254,7 @@ void	drawtofloor(Floor *, Rectangle, uchar);
 void	drawtile(Floor*, Point, uchar);
 Point	randempty(Floor*);
 Point	spawnentity(Floor*, uchar);
-int		moveentity(Floor*, Point, int);
+int		moveentity(Floor*, Point, int, Creep*);
 void	drawfloor(Floor*);
 int		additem(Floor*, Point, uchar);
 void	inititems(Floor*);
@@ -245,7 +268,7 @@ void	discover(Floor*);
 void 	drawstringtile(Floor*, Point, char*);
 void	redrawitem(Floor*);
 uchar	isonstair(Floor*);
-
+Item*	isonitem(Floor*);
 
 /* path.c */
 void	djikstra(Floor*);
@@ -254,24 +277,34 @@ void	drawpath(Floor*);
 void	drawpathtunnel(Floor*);
 
 /* creep.c */
-int		isoccupied(Floor*, Point);
+int		isoccupied(Floor*, Point, Creep*);
 void	spawncreep(Floor*);
 void	redrawcreep(Floor*);
 void	tickcreep(Floor*);
+Creep*	point2creep(Floor*, Point);
 
 /* utility.c */
 int		overlaps(Rectangle, Rectangle);
 int		within(Rectangle, Point);
 int		isbigendian(void);
-void	roledir(Dice*);
+void	roledie(Dice*);
 Dice*	str2dice(char*);
 
 /* menu.c */
 void	monstermenu(Floor*, Point*);
 void	resetcur(void);
+int		drawnukmenu(struct nk_context*, Event*, int);
+int		drawitemmenu(struct nk_context*, Event*, int, int);
 
 /* fmt.c */
 #pragma varargck type "D" Dice*
 #pragma varargck type "U" CreepAbil
 #pragma varargck type "C" CreepLex*
 void	lairfmtinstall(void);
+
+/* item.c */
+List* 	createlist(void);
+void	appendlist(List*, void*);
+void	deletelistitem(List*);
+void	dropitem(Floor*, List*);
+void	equipitem(Floor*, List*);

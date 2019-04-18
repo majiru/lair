@@ -1,5 +1,7 @@
 </$objtype/mkfile
 BIN=/$objtype/bin
+CFLAGS=$CFLAGS -p
+LDFLAGS=-p
 TARG=lair
 OFILES=\
 	lair.$O \
@@ -10,6 +12,7 @@ OFILES=\
 	creep.$O \
 	menu.$O \
 	fmt.$O \
+	item.$O \
 	y.tab.$O\
 	lex.yy.$O \
 

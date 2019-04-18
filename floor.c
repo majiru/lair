@@ -1,6 +1,9 @@
 #include <u.h>
 #include <libc.h>
 #include <draw.h>
+#include <memdraw.h>
+#include <event.h>
+#include <nuklear.h>
 #include <heap.h>
 
 #include "lair.h"
@@ -53,7 +56,7 @@ initfloor(Floor *f)
 	initmap(f);
 	initportal(f);
 	inititems(f);
-	f->playpos = spawnentity(f, TPlayer);
+	f->player->pos = spawnentity(f, TPlayer);
 	spawncreep(f);
 }
 
@@ -64,6 +67,10 @@ newfloor(void)
 	int fd;
 
 	f = mallocz(sizeof(Floor), 1);
+	f->player = mallocz(sizeof(Creep), 1);
+	f->player->equipment = createlist();
+	f->player->inventory = createlist();
+	f->player->health = 100;
 	f->map = malloc(sizeof(Tile));
 
 	if((fd = open("tiles.img", OREAD)) < 0)
@@ -187,9 +194,9 @@ minewall(Floor *f, Point p)
 
 
 int
-moveentity(Floor *f, Point dest, int canmine)
+moveentity(Floor *f, Point dest, int canmine, Creep *c)
 {
-	if(isoccupied(f, dest))
+	if(isoccupied(f, dest, c))
 		return 0;
 
 	if(f->map[dest.x * f->rows + dest.y].type == TEmpty)
@@ -227,9 +234,12 @@ redrawitem(Floor *f)
 	for(i = 0; i < PORTALMAX; i++)
 		if(cheatDefog == 1 || f->map[MAPINDEXPT(f, f->stairs[i].pos)].seen == 1)
 			drawtile(f, f->stairs[i].pos, f->stairs[i].tile);
-	for(i = 0; i < f->nitem; i++)
+	for(i = 0; i < f->nitem; i++){
+		if(f->items[i]->pickedup != 0)
+			continue;
 		if(cheatDefog == 1 || f->map[MAPINDEXPT(f, f->items[i]->pos)].seen == 1)
 			drawtile(f, f->items[i]->pos, f->items[i]->info->type);
+	}
 
 }
 
@@ -327,8 +337,8 @@ marknearby(Floor *f, Point p)
 	int i;
 	Point tmp;
 
-	tmp.x = f->playpos.x > p.x ? f->playpos.x - p.x : p.x - f->playpos.x;
-	tmp.y = f->playpos.y > p.y ? f->playpos.y - p.y : p.y - f->playpos.y;
+	tmp.x = f->player->pos.x > p.x ? f->player->pos.x - p.x : p.x - f->player->pos.x;
+	tmp.y = f->player->pos.y > p.y ? f->player->pos.y - p.y : p.y - f->player->pos.y;
 	if(f->map[MAPINDEXPT(f, tmp)].type == TEmpty)
 		tmp = mulpt(tmp, 2);
 
@@ -360,13 +370,13 @@ discover(Floor *f)
 {
 	int i;
 	for(i = 0; i < f->nrooms; ++i)
-		if(within(f->rooms[i], f->playpos)){
+		if(within(f->rooms[i], f->player->pos)){
 			discoverrect(f, Rpt(subpt(f->rooms[i].min, Pt(2,2)), addpt(f->rooms[i].max, Pt(2,2))));
 			return;
 		}
 
 	/* Player must be in a hallway, lets do this the hard way */
-	marknearby(f, f->playpos);
+	marknearby(f, f->player->pos);
 }
 
 void
@@ -416,7 +426,17 @@ isonstair(Floor *f)
 {
 	int i;
 	for(i = 0; i < PORTALMAX; i++)
-		if(eqpt(f->stairs[i].pos, f->playpos))
+		if(eqpt(f->stairs[i].pos, f->player->pos))
 			return f->stairs[i].tile;
 	return 0;
+}
+
+Item*
+isonitem(Floor *f)
+{
+	int i;
+	for(i = 0; i < ITEMMAX; i++)
+		if(eqpt(f->items[i]->pos, f->player->pos) && f->items[i]->pickedup == 0)
+			return f->items[i];
+	return nil;
 }
