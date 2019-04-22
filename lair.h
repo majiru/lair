@@ -20,10 +20,6 @@
 
 #define VIEWDIST 4
 
-#ifdef __cplusplus
-extern "C" void p9main(int,char**);
-#endif
-
 /* Utility macros */
 #define MAX(a, b) (a) > (b) ? (a) : (b)
 #define MIN(a, b) (a) < (b) ? (a) : (b)

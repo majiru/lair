@@ -11,10 +11,6 @@ NOP9P: export LEX = ./lex
 NOP9P: export YACC = ./yacc
 NOP9P: lair
 
-cplusplus: export CC = ./9c++
-cplusplus: export LD = ./9l++
-cplusplus: lair
-
 lair: floor.c lair.c util.c path.c creep.c menu.c
 	$(YACC) -d monster.y
 	$(LEX) -9 monster.l
