@@ -1,8 +1,10 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include <draw.h>
-#include <event.h>
 #include <keyboard.h>
+#include <cursor.h>
+#include <mouse.h>
 #include <heap.h>
 #include <memdraw.h>
 #include <nuklear.h>
@@ -11,6 +13,14 @@
 
 char *buttons[] = {"exit", 0};
 Menu menu = {buttons};
+
+enum{MOUSE, RESIZE, KEYBD, NONE};
+
+mainstacksize = 32 * 1024;
+
+Mousectl *mctl;
+Keyboardctl *kctl;
+struct nk_context *ctx;
 
 /* Flag for user control to tell us if we are in the monster menu */
 int inmenu;
@@ -23,7 +33,7 @@ Floor *curfloor;
 /* How many floors has the user gone? */
 uchar curdepth;
 
-/* BUG: Plan9port doesn't like display->black and display->white */
+/* Used for drawing text */
 Image *black;
 Image *white;
 
@@ -31,6 +41,14 @@ int inspection;
 int cheatDefog;
 int cheatTeleport;
 
+void
+quit(void){
+	killdjikstra();
+	closedisplay(display);
+	closemouse(mctl);
+	closekeyboard(kctl);
+	threadexitsall(nil);
+}
 
 void
 redrawfloor(void)
@@ -39,6 +57,7 @@ redrawfloor(void)
 	redrawcreep(curfloor);
 	redrawitem(curfloor);
 	drawtile(curfloor, curfloor->player->pos, TPlayer);
+	flushimage(display, Refnone);
 }
 
 void
@@ -59,14 +78,11 @@ eresized(int isnew)
 		initmap(curfloor);
 
 	discover(curfloor);
-	drawfloor(curfloor);
-	redrawcreep(curfloor);
-	redrawitem(curfloor);
-	drawtile(curfloor, curfloor->player->pos, TPlayer);
+	redrawfloor();
 	resetcur();
 }
 
-int
+void
 handleaction(Rune rune)
 {
 	static Point dst = {0, 0};
@@ -83,7 +99,7 @@ handleaction(Rune rune)
 	case Kbs:
 	case Kdel:
 	case 'Q':
-		exits(nil);
+		quit();
 
 	/* Menu/Debug keys, does not count as player turn */
 	case Kesc:
@@ -96,41 +112,48 @@ handleaction(Rune rune)
 
 	case 'D':
 		drawpath(curfloor);
-		return 0;
+		return;
 
 	case 'H':
 		drawhardness(curfloor);
-		return 0;
+		return;
 
 	case 'T':
 		drawpathtunnel(curfloor);
-		return 0;
+		return;
 
 	case 'm':
 		monstermenu(curfloor, nil);
 		inmenu = 1;
-		return 0;
+		return;
 
 	case 'i':
-		return ItemMenuInv;
+		drawitemmenu(ctx, mctl->c, kctl->c, ItemMenuInv);
+		goto draw;
 
 	case 'w':
-		return ItemMenuWear;
+		drawitemmenu(ctx, mctl->c, kctl->c, ItemMenuWear);
+		goto draw;
 
 	case 't':
-		return ItemMenuRemove;
+		drawitemmenu(ctx, mctl->c, kctl->c, ItemMenuRemove);
+		goto draw;
 
 	case 'd':
-		return ItemMenuDrop;
+		drawitemmenu(ctx, mctl->c, kctl->c, ItemMenuDrop);
+		goto draw;
 
 	case 'x':
-		return ItemMenuDel;
+		drawitemmenu(ctx, mctl->c, kctl->c, ItemMenuDel);
+		goto draw;
 
 	case 'e':
-		return ItemMenuEquip;
+		drawitemmenu(ctx, mctl->c, kctl->c, ItemMenuEquip);
+		goto draw;
 
 	case 'I':
-		return ItemMenuInspect;
+		drawitemmenu(ctx, mctl->c, kctl->c, ItemMenuInspect);
+		goto draw;
 
 	case 'f':
 		cheatDefog = !cheatDefog;
@@ -149,7 +172,6 @@ handleaction(Rune rune)
 		inspection = !inspection;
 		/* Viewing selected monster */
 		if(inspection == 0){
-			Event e;
 			int count = 1;
 			char *tmp, *buf, *cursor;
 
@@ -165,13 +187,12 @@ handleaction(Rune rune)
 				cursor = tmp+1;
 				count++;
 			}
-			/* Display the desc until next keyboard event */
-			while(event(&e) != Ekeyboard)
-				;
+			flushimage(display, Refnone);
+			recv(kctl->c, nil);
 			free(buf);
 			goto draw;
 		}
-		return 0;
+		return;
 
 	/* Movement/Action keys */
 	case '<':
@@ -179,14 +200,14 @@ handleaction(Rune rune)
 			nextfloor(&curfloor);
 			goto draw;
 		}
-		return 0;
+		return;
 
 	case '>':
 		if(isonstair(curfloor) == TPortalU){
 			nextfloor(&curfloor);
 			goto draw;
 		}
-		return 0;
+		return;
 
 	case ',':
 		topickup = isonitem(curfloor);
@@ -194,7 +215,7 @@ handleaction(Rune rune)
 			topickup->pickedup = 1;
 			appendlist(curfloor->player->inventory, topickup->info);
 		}
-		return 0;
+		return;
 
 	case Khome:
 	case '7':
@@ -208,7 +229,7 @@ handleaction(Rune rune)
 		if(inmenu == 1){
 			menudst = Pt(0, -1);
 			monstermenu(curfloor, &menudst);
-			return 0;
+			return;
 		}else
 			dst = subpt(dst, Pt(0, 1));
 		break;
@@ -225,7 +246,7 @@ handleaction(Rune rune)
 		if(inmenu == 1){
 			menudst = Pt(0, 1);
 			monstermenu(curfloor, &menudst);
-			return 0;
+			return;
 		}else
 			dst = addpt(dst, Pt(0, 1));
 		break;
@@ -257,14 +278,16 @@ handleaction(Rune rune)
 	case '.':
 	case ' ':
 	case '5':
-		break;
+		tickcreep(curfloor);
+		goto draw;
 
 	default:
-		return 0;
+		return;
 	}
 	if(cheatTeleport != 0 || inspection != 0){
 		drawstringtile(curfloor, dst, "*");
-		return 0;
+		flushimage(display, Refnone);
+		return;
 	}
 	if(moveentity(curfloor, dst, 0, curfloor->player)){
 			curfloor->player->pos = dst;
@@ -274,7 +297,7 @@ handleaction(Rune rune)
 draw:
 	discover(curfloor);
 	redrawfloor();
-	return 0;
+	return;
 }
 
 void
@@ -284,19 +307,32 @@ usage(void)
 	exits("usage");
 }
 
-#ifdef __cplusplus
 void
-p9main(int argc, char *argv[])
-#else
-void
-main(int argc, char *argv[])
-#endif
+threadmain(int argc, char *argv[])
 {
-	Event ev;
-	int e, i;
+	int i;
 	int saveflg, loadflg;
 	struct nk_context sctx;
 	struct nk_user_font nkfont;
+	Mouse mouse;
+	Rune kbd;
+	int resize[2];
+
+	if(initdraw(nil, nil, "lair") < 0)
+		sysfatal("lair: Failed to init screen %r");
+
+	if((mctl = initmouse(nil, screen)) == nil)
+		sysfatal("%s: %r", argv0);
+	if((kctl = initkeyboard(nil)) == nil)
+		sysfatal("%s: %r", argv0);
+
+	Alt alts[4] = {
+		{mctl->c, &mouse, CHANRCV},
+		{mctl->resizec, &resize, CHANRCV},
+		{kctl->c, &kbd, CHANRCV},
+		{nil, nil, CHANEND},
+	};
+
 	int curitemmenu = 0;
 
 	inmainmenu = 1;
@@ -336,50 +372,34 @@ main(int argc, char *argv[])
 	close(infd);
 	close(outfd);
 
-	if(initdraw(nil, nil, "lair") < 0)
-		sysfatal("lair: Failed to init screen %r");
-
 	nk_plan9_makefont(&nkfont, font);
 	if(!nk_init_default(&sctx, &nkfont))
 		sysfatal("nk_init: %r");
+
+	ctx = &sctx;
 
 	black = allocimage(display, Rect(0, 0, 1, 1), screen->chan, 1, DBlack);
 	white = allocimage(display, Rect(0, 0, 1, 1), screen->chan, 1, DWhite);
 
 	srand(time(0));
 
+	drawnukmenu(ctx, mctl->c, kctl->c);
+	inmainmenu = 0;
+
 	curfloor = newfloor();
-	einit(Ekeyboard | Emouse);
 
 	eresized(0);
 
+	startdjikstra();
+
 	for(;;){
-		e = event(&ev);
-
-skipinput:
-		if(inmainmenu != 0){
-			inmainmenu = !(drawnukmenu(&sctx, &ev, e));
-			if(inmainmenu == 1)
-				continue;
-			else
-				eresized(0);
-		}
-
-
-		if(initemmenu != 0){
-			initemmenu = !(drawitemmenu(&sctx, &ev, e, curitemmenu));
-			continue;
-		}
-
-		if((e == Emouse) && 
-			(ev.mouse.buttons & 4) &&
-			(emenuhit(3, &ev.mouse, &menu) == 0)) exits(nil);
-		if(e == Ekeyboard){
-			curitemmenu = handleaction(ev.kbdc);
-			if(curitemmenu != 0){
-				initemmenu = 1;
-				goto skipinput;
-			}
+		switch(alt(alts)){
+			case KEYBD:
+				handleaction(kbd);
+				break;
+			case RESIZE:
+				eresized(1);
+				break;
 		}
 	}
 }

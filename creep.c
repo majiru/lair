@@ -1,8 +1,9 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include <draw.h>
 #include <memdraw.h>
-#include <event.h>
+#include <mouse.h>
 #include <nuklear.h>
 #include <heap.h>
 
@@ -231,8 +232,7 @@ tickcreep(Floor *f)
 	int i;
 	Point dest;
 
-	djikstra(f);
-	djikstratunnel(f);
+	tickdjikstra();
 
 	for(i = 0; i < f->ncreep; i++){
 		if(f->creeps[i]->health < 0)

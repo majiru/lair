@@ -1,9 +1,10 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include <draw.h>
 #include <memdraw.h>
+#include <mouse.h>
 #include <keyboard.h>
-#include <event.h>
 #include <nuklear.h>
 #include <heap.h>
 
@@ -38,7 +39,7 @@ mainmenu(struct nk_context *ctx)
 		}
 
 		if(nk_button_label(ctx, "Quit"))
-			exits(nil);
+			quit();
 	}
 	nk_end(ctx);
 
@@ -66,127 +67,114 @@ inventorymenu(struct nk_context *ctx, List *l)
 	return nil;
 }
 
-int
-drawnukmenu(struct nk_context *ctx, Event *e, int flag)
+void
+drawnukmenu(struct nk_context *ctx, Channel *mc, Channel *kc)
 {
-	nk_input_begin(ctx);
-	switch(flag){
-	case Emouse:
-		nk_plan9_handle_mouse(ctx, e->mouse, screen->r.min);
-		break;
+	Mouse m;
+	Rune kbd;
 
-	case Ekeyboard:
-		/* Broken: Blame event(2)
-		nk_plan9_handle_kbd(ctx, (char*)e->data, e->n);
-		*/
-		if(e->kbdc == Kdel){
-			exits(nil);
+	Alt a[] = {
+		{mc, &m, 	CHANRCV},
+		{kc, &kbd,	CHANRCV},
+		{nil, nil, 	CHANEND},
+	};
+
+	for(;;){
+		nk_input_begin(ctx);
+
+		switch(alt(a)){
+		case 0:
+			nk_plan9_handle_mouse(ctx, m, screen->r.min);
+			break;
+		case 1:
+			if(kbd == Kdel)
+				quit();
+			break;
 		}
-		break;
+		nk_input_end(ctx);
+
+		draw(screen, screen->r, black, nil, ZP);
+		if(mainmenu(ctx) != 0){
+			return;
+		}
+
+		nk_plan9_render(ctx, screen);
+		flushimage(display, 1);
 	}
-	nk_input_end(ctx);
-
-	/* Right way to do things, nuklear expects raw /dev/kdb reads
-	if(nk_input_is_key_down(&ctx->input, NK_KEY_DEL))
-			exits(nil);
-
-	*/
-
-	draw(screen, screen->r, black, nil, ZP);
-	if(mainmenu(ctx) != 0)
-		return 1;
-
-	nk_plan9_render(ctx, screen);
-	flushimage(display, 1);
-	return 0;
 }
 
-/* TODO: less copy paste */
-int
-drawitemmenu(struct nk_context *ctx, Event *e, int flag, int menu)
+void
+drawitemmenu(struct nk_context *ctx, Channel *mc, Channel *kc, int menu)
 {
-	List *l = nil;
+	List *l;
+	Mouse m;
+	Rune kbd;
 
-	/* TODO: this is bad */
-	extern void redrawfloor(void);
+	Alt a[] = {
+		{mc, &m, 	CHANRCV},
+		{kc, &kbd,	CHANRCV},
+		{nil, nil, 	CHANEND},
+	};
 	
-	nk_input_begin(ctx);
-	switch(flag){
-	case Emouse:
-		nk_plan9_handle_mouse(ctx, e->mouse, screen->r.min);
-		break;
-
-
-	case Ekeyboard:
-		/* Broken: Blame event(2)
-		nk_plan9_handle_kbd(ctx, (char*)e->data, e->n);
-		*/
-		if(e->kbdc == Kdel || e->kbdc == Kesc){
-			nk_input_end(ctx);
-			redrawfloor();
-			return 1;
+	for(;;){
+		switch(menu){
+		case ItemMenuInv:
+			inventorymenu(ctx, curfloor->player->inventory);
+			break;
+		case ItemMenuEquip:
+			inventorymenu(ctx, curfloor->player->equipment);
+			break;
+		case ItemMenuWear:
+			l = inventorymenu(ctx, curfloor->player->inventory);
+			if(l != nil){
+				equipitem(curfloor, l);
+			}
+			break;
+		case ItemMenuDrop:
+			l = inventorymenu(ctx, curfloor->player->inventory);
+			if(l != nil){
+				dropitem(curfloor, l);
+				deletelistitem(l);
+			}
+			break;
+		case ItemMenuRemove:
+			l = inventorymenu(ctx, curfloor->player->equipment);
+			if(l != nil){
+				appendlist(curfloor->player->inventory, l->datum);
+				deletelistitem(l);
+			}
+			break;
+		case ItemMenuDel:
+			l = inventorymenu(ctx, curfloor->player->inventory);
+			if(l != nil)
+				deletelistitem(l);
+			break;
+		case ItemMenuInspect:
+			l = inventorymenu(ctx, curfloor->player->inventory);
+			if(l != nil){
+				draw(screen, Rpt(screen->r.min, Pt(screen->r.max.x, screen->r.min.y + 20)), white, nil, ZP);
+				string(screen, screen->r.min, black, screen->r.min, font, ((ItemLex*)l->datum)->desc);
+			}
+			break;
 		}
-		break;
+
+		nk_plan9_render(ctx, screen);
+		flushimage(display, 1);
+
+		nk_input_begin(ctx);
+		switch(alt(a)){
+		case 0:
+			nk_plan9_handle_mouse(ctx, m, screen->r.min);
+			break;
+		case 1:
+			if(kbd == Kdel)
+				quit();
+			if(kbd == Kesc)
+				return;
+			break;
+		}
+		nk_input_end(ctx);
 	}
-	nk_input_end(ctx);
-
-	/* Right way to do things, nuklear expects raw /dev/kdb reads
-	if(nk_input_is_key_down(&ctx->input, NK_KEY_DEL))
-			exits(nil);
-
-	*/
-
-	switch(menu){
-	case ItemMenuInv:
-		l = inventorymenu(ctx, curfloor->player->inventory);
-		break;
-	case ItemMenuEquip:
-		l = inventorymenu(ctx, curfloor->player->equipment);
-		break;
-	case ItemMenuWear:
-		l = inventorymenu(ctx, curfloor->player->inventory);
-		if(l != nil){
-			equipitem(curfloor, l);
-		}
-		break;
-	case ItemMenuDrop:
-		l = inventorymenu(ctx, curfloor->player->inventory);
-		if(l != nil){
-			dropitem(curfloor, l);
-			deletelistitem(l);
-		}
-		break;
-	case ItemMenuRemove:
-		l = inventorymenu(ctx, curfloor->player->equipment);
-		if(l != nil){
-			appendlist(curfloor->player->inventory, l->datum);
-			deletelistitem(l);
-		}
-		break;
-	case ItemMenuDel:
-		l = inventorymenu(ctx, curfloor->player->inventory);
-		if(l != nil)
-			deletelistitem(l);
-		break;
-	case ItemMenuInspect:
-		l = inventorymenu(ctx, curfloor->player->inventory);
-		if(l != nil){
-			draw(screen, Rpt(screen->r.min, Pt(screen->r.max.x, screen->r.min.y + 20)), white, nil, ZP);
-			string(screen, screen->r.min, black, screen->r.min, font, ((ItemLex*)l->datum)->desc);
-			/* Display the desc until next keyboard event */
-			while(event(e) != Ekeyboard)
-				;
-		}
-		break;
-	}
-
-	nk_plan9_render(ctx, screen);
-	flushimage(display, 1);
-	if(l != nil){
-		redrawfloor();
-		return 1;
-	}
-	return 0;
 }
 
 void

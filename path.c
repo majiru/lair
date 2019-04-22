@@ -1,12 +1,18 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include <draw.h>
 #include <memdraw.h>
-#include <event.h>
+#include <mouse.h>
 #include <nuklear.h>
 #include <heap.h>
 
 #include "lair.h"
+
+Channel *normaldjikstra[2] = {nil, nil};
+Channel *tunneldjikstra[2] = {nil, nil};
+
+int workers[2] = {0, 0};
 
 /* Note: use of curfloor is a hack */
 static int
@@ -22,12 +28,19 @@ tunneldistcmp(const void *key, const void *with) {
 }
 
 void
-djikstra(Floor *f)
+djikstra(void*)
 {
 	int i, j;
 	Heap h;
 
 	Path *path, *p;
+
+	Floor *f;
+	Channel *in = normaldjikstra[0];
+	Channel *out = normaldjikstra[1];
+	for(;;){
+	f = curfloor;
+	recv(in, nil);
 
 	path = mallocz(sizeof(Path) * f->cols * f->rows, 1);
 	if(path == nil)
@@ -103,11 +116,13 @@ djikstra(Floor *f)
 		}
 	}
 	free(path);
+	send(out, nil);
+	}
 }
 
 
 void
-djikstratunnel(Floor *f)
+djikstratunnel(void*)
 {
 	int i, j;
 	Heap h;
@@ -115,6 +130,14 @@ djikstratunnel(Floor *f)
 	int tunnelcost;
 
 	Path *path, *p;
+
+	Floor *f;
+	Channel *in = tunneldjikstra[0];
+	Channel *out = tunneldjikstra[1];
+
+	for(;;){
+	f = curfloor;
+	recv(in, nil);
 
 	path = mallocz(sizeof(Path) * f->cols * f->rows, 1);
 	if(path == nil)
@@ -202,6 +225,8 @@ djikstratunnel(Floor *f)
 		}
 	}
 	free(path);
+	send(out, nil);
+	}
 }
 
 void
@@ -235,4 +260,52 @@ drawpathtunnel(Floor *f)
 			string(screen, min, white, min, font, buf);
 		}
 
+}
+
+void
+startdjikstra(void)
+{
+	/* Assert to avoid memory and proc leak */
+	assert(normaldjikstra[0] == nil && normaldjikstra[1] == nil);
+	assert(workers[0] == 0);
+	assert(tunneldjikstra[0] == nil && tunneldjikstra[1] == nil);
+	assert(workers[1] == 0);
+
+	normaldjikstra[0] = chancreate(sizeof(char), 0);
+	normaldjikstra[1] = chancreate(sizeof(char), 0);
+	workers[0] = proccreate(djikstra, nil, 2048);
+
+	tunneldjikstra[0] = chancreate(sizeof(char), 0);
+	tunneldjikstra[1] = chancreate(sizeof(char), 0);
+	workers[1] = proccreate(djikstratunnel, nil, 2048);
+}
+
+void
+killdjikstra(void)
+{
+	if(normaldjikstra[0] != nil)
+		chanfree(normaldjikstra[0]);
+	if(normaldjikstra[1] != nil)
+		chanfree(normaldjikstra[1]);
+	if(workers[0] != 0)
+		threadkill(workers[0]);
+
+	if(tunneldjikstra[0] != nil)
+		chanfree(tunneldjikstra[0]);
+	if(tunneldjikstra[1] != nil)
+		chanfree(tunneldjikstra[1]);
+	if(workers[1] != 0)
+		threadkill(workers[1]);
+}
+
+void
+tickdjikstra(void)
+{
+	/* Wake up the threads */
+	send(normaldjikstra[0], nil);
+	send(tunneldjikstra[0], nil);
+
+	/* Wait for threads to finish */
+	recv(normaldjikstra[1], nil);
+	recv(tunneldjikstra[1], nil);
 }

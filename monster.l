@@ -1,7 +1,8 @@
 %{
+#include <thread.h>
 #include <draw.h>
+#include <mouse.h>
 #include <memdraw.h>
-#include <event.h>
 #include <nuklear.h>
 #include <heap.h>
 

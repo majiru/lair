@@ -1,8 +1,9 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include <draw.h>
 #include <memdraw.h>
-#include <event.h>
+#include <mouse.h>
 #include <nuklear.h>
 #include <heap.h>
 
@@ -70,7 +71,7 @@ newfloor(void)
 	f->player = mallocz(sizeof(Creep), 1);
 	f->player->equipment = createlist();
 	f->player->inventory = createlist();
-	f->player->health = 100;
+	f->player->health = 100000;
 	f->map = malloc(sizeof(Tile));
 
 	if((fd = open("tiles.img", OREAD)) < 0)
@@ -86,6 +87,10 @@ void
 nextfloor(Floor **f)
 {
 	Floor *newf = mallocz(sizeof(Floor), 1);
+	newf->player = mallocz(sizeof(Creep), 1);
+	newf->player->equipment = createlist();
+	newf->player->inventory = createlist();
+	newf->player->health = 100000;
 	newf->map = malloc(sizeof(Tile));
 	newf->tilesheet = (*f)->tilesheet;
 	resizefloor(newf);
@@ -320,7 +325,6 @@ assignhardness(Floor *f)
 			}
 }
 
-/* TODO: Combine this with drawtofloor, taking whole Tile as argument */
 void
 discoverrect(Floor *f, Rectangle r)
 {

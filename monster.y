@@ -1,10 +1,11 @@
 %{
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include <bio.h>
 #include <draw.h>
+#include <mouse.h>
 #include <memdraw.h>
-#include <event.h>
 #include <nuklear.h>
 #include <heap.h>
 
@@ -208,6 +209,9 @@ additemelem(ItemLex *l, char *key, void *val)
 	else
 		sysfatal("Unknown token: %s", key);
 
+
+	free(key);
+
 }
 
 void
@@ -246,6 +250,7 @@ addmonsterelem(CreepLex *l, char *key, void *val)
 	else
 		sysfatal("Unknown token: %s", key);
 
+	free(key);
 }
 
 %}
@@ -305,8 +310,20 @@ expr:
 
 text:
 	TokStr			{ $$ = $1; }
-	| text TokStr 	{ $$ = strcat(strcat($1, " "), $2); }
-	| text TokLBr	{ $$ = strcat($1, "\n"); }
+	| text TokStr 	{
+						char *tmp = mallocz(strlen($1) + strlen($2) + 4, 1);
+						tmp = strcat(tmp, $1);
+						tmp = strcat(tmp, " ");
+						tmp = strcat(tmp, $2);
+						free($2);
+						$$ = tmp;
+					}
+	| text TokLBr	{
+						char *tmp = mallocz(strlen($1) + 2, 1);
+						tmp = strcat(tmp, $1);
+						tmp = strcat(tmp, "\n");
+						$$ = tmp;
+					}
 
 %%
 

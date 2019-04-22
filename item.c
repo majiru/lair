@@ -1,7 +1,8 @@
 #include <u.h>
 #include <libc.h>
+#include <thread.h>
 #include <draw.h>
-#include <event.h>
+#include <mouse.h>
 #include <keyboard.h>
 #include <heap.h>
 #include <memdraw.h>

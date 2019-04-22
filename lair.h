@@ -14,7 +14,7 @@
 #define ITEMMAX 10
 
 #define CREEPMAX 100
-#define NUMCREEP 25
+#define NUMCREEP 10
 
 #define MAXLEXICON 32
 
@@ -197,7 +197,6 @@ struct Tile {
 	uchar seen;
 	int pcdistance;
 	int tunneldistance;
-	uchar itemID;
 } Tile;
 
 /* Floor represents a single 'level' of the map */
@@ -242,6 +241,8 @@ extern ItemLex *itemlexicon[MAXLEXICON];
 extern int ncreeplex;
 extern int nitemlex;
 
+/* lair.c */
+void	quit(void);
 
 /* floor.c */
 Floor*	newfloor(void);
@@ -271,8 +272,9 @@ uchar	isonstair(Floor*);
 Item*	isonitem(Floor*);
 
 /* path.c */
-void	djikstra(Floor*);
-void	djikstratunnel(Floor*);
+void	tickdjikstra(void);
+void	startdjikstra(void);
+void	killdjikstra(void);
 void	drawpath(Floor*);
 void	drawpathtunnel(Floor*);
 
@@ -293,8 +295,8 @@ Dice*	str2dice(char*);
 /* menu.c */
 void	monstermenu(Floor*, Point*);
 void	resetcur(void);
-int		drawnukmenu(struct nk_context*, Event*, int);
-int		drawitemmenu(struct nk_context*, Event*, int, int);
+void	drawnukmenu(struct nk_context*, Channel*, Channel*);
+void	drawitemmenu(struct nk_context*, Channel*, Channel*, int);
 
 /* fmt.c */
 #pragma varargck type "D" Dice*
