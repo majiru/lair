@@ -95,7 +95,7 @@ drawnukmenu(struct nk_context *ctx, Channel *mc, Channel *kc)
 
 		draw(screen, screen->r, black, nil, ZP);
 		if(mainmenu(ctx) != 0){
-			return;
+			break;
 		}
 
 		nk_plan9_render(ctx, screen);
@@ -170,6 +170,7 @@ drawitemmenu(struct nk_context *ctx, Channel *mc, Channel *kc, int menu)
 			if(kbd == Kdel)
 				quit();
 			if(kbd == Kesc)
+				resettileskip(curfloor);
 				return;
 			break;
 		}

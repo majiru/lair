@@ -13,6 +13,7 @@ OFILES=\
 	menu.$O \
 	fmt.$O \
 	item.$O \
+	net.$O \
 	y.tab.$O\
 	lex.yy.$O \
 

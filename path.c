@@ -39,8 +39,8 @@ djikstra(void*)
 	Channel *in = normaldjikstra[0];
 	Channel *out = normaldjikstra[1];
 	for(;;){
-	f = curfloor;
 	recv(in, nil);
+	f = curfloor;
 
 	path = mallocz(sizeof(Path) * f->cols * f->rows, 1);
 	if(path == nil)
@@ -136,8 +136,8 @@ djikstratunnel(void*)
 	Channel *out = tunneldjikstra[1];
 
 	for(;;){
-	f = curfloor;
 	recv(in, nil);
+	f = curfloor;
 
 	path = mallocz(sizeof(Path) * f->cols * f->rows, 1);
 	if(path == nil)

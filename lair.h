@@ -191,6 +191,7 @@ struct Tile {
 	uchar type;
 	uchar hardness;
 	uchar seen;
+	uchar skip;
 	int pcdistance;
 	int tunneldistance;
 } Tile;
@@ -230,7 +231,6 @@ extern Image *white;
 extern int cheatDefog;
 extern int cheatTeleport;
 
-
 /* Declared in monster.y */
 extern CreepLex *creeplexicon[MAXLEXICON];
 extern ItemLex *itemlexicon[MAXLEXICON];
@@ -262,6 +262,7 @@ void	path(Floor*, Rectangle, Rectangle);
 void	assignhardness(Floor*);
 void	drawhardness(Floor*);
 void	discover(Floor*);
+void	resettileskip(Floor*);
 void 	drawstringtile(Floor*, Point, char*);
 void	redrawitem(Floor*);
 uchar	isonstair(Floor*);
@@ -306,3 +307,7 @@ void	appendlist(List*, void*);
 void	deletelistitem(List*);
 void	dropitem(Floor*, List*);
 void	equipitem(Floor*, List*);
+
+/* net.c */
+Channel*	coninit(int buffsize);
+void		condestroy(Channel *c);

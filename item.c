@@ -116,7 +116,7 @@ equipitem(Floor *f, List *item)
 		return;
 	}
 
-	assert(toswap == nil);
+	assert(toswap != nil);
 	/* Player has item already equiped, we must swap them */
 	appendlist(f->player->inventory, toswap->datum);
 	deletelistitem(toswap);

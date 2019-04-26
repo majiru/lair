@@ -78,6 +78,10 @@ newfloor(void)
 		sysfatal("%s: Could not find tilemap", argv0);
 
 	f->tilesheet = readimage(display, fd, 0);
+	if(f->tilesheet  == nil){
+		fprint(2, "Could not load tilesheet: %r\n");
+		quit();
+	}
 	close(fd);
 
 	return f;
@@ -87,10 +91,7 @@ void
 nextfloor(Floor **f)
 {
 	Floor *newf = mallocz(sizeof(Floor), 1);
-	newf->player = mallocz(sizeof(Creep), 1);
-	newf->player->equipment = createlist();
-	newf->player->inventory = createlist();
-	newf->player->health = 100000;
+	newf->player = (*f)->player;
 	newf->map = malloc(sizeof(Tile));
 	newf->tilesheet = (*f)->tilesheet;
 	resizefloor(newf);
@@ -100,6 +101,7 @@ nextfloor(Floor **f)
 	curdepth++;
 	*f = newf;
 	initfloor(*f);
+	newf->player->pos = randempty(newf);
 }
 
 void
@@ -156,11 +158,17 @@ drawfloor(Floor *f)
 	int i, j;
 
 	for(i = 0; i < f->cols; i++)
-		for(j = 0; j < f->rows; j++)
+		for(j = 0; j < f->rows; j++){
+			if(f->map[i*f->rows + j].skip != 0)
+				continue;
+
 			if(cheatDefog == 0 && f->map[i*f->rows + j].seen == 0)
 				drawtile(f, Pt(i, j), THidden);
 			else
 				drawtile(f, Pt(i, j), f->map[i*f->rows + j].type);
+
+			f->map[i*f->rows + j].skip++;
+		}
 }
 
 Point
@@ -180,7 +188,6 @@ Point
 spawnentity(Floor *f, uchar tile)
 {
 	Point p = randempty(f);
-	drawtile(f, p, tile);
 	return p;
 }
 
@@ -201,6 +208,7 @@ minewall(Floor *f, Point p)
 int
 moveentity(Floor *f, Point dest, int canmine, Creep *c)
 {
+	f->map[c->pos.x * f->rows + c->pos.y].skip = 0;
 	if(isoccupied(f, dest, c))
 		return 0;
 
@@ -332,7 +340,10 @@ discoverrect(Floor *f, Rectangle r)
 
 	for(i = r.min.x; i < r.max.x; i++)
 		for(j = r.min.y; j < r.max.y; j++)
-			f->map[i * f->rows + j].seen = 1;
+			if(i < f->cols && j < f->rows){
+				f->map[i * f->rows + j].seen = 1;
+				f->map[i * f->rows + j].skip = 0;
+			}
 }
 
 void
@@ -350,6 +361,7 @@ marknearby(Floor *f, Point p)
 		return;
 
 	f->map[MAPINDEXPT(f, p)].seen = 1;
+	f->map[MAPINDEXPT(f, p)].skip = 0;
 	for(i = 1; i <= VIEWDIST; ++i){
 		tmp = addpt(p, Pt(0, i));
 		if(f->map[MAPINDEXPT(f, tmp)].seen == 0)
@@ -398,6 +410,15 @@ drawhardness(Floor *f)
 			string(screen, min, display->white, min, font, buf);
 		}
 
+}
+
+void
+resettileskip(Floor *f)
+{
+	int i, j;
+	for(i = 0; i < f->cols; i++)
+		for(j = 0; j < f->rows; j++)
+			f->map[i * f->rows + j].skip = 0;
 }
 
 void

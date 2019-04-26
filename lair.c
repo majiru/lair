@@ -14,7 +14,7 @@
 char *buttons[] = {"exit", 0};
 Menu menu = {buttons};
 
-enum{MOUSE, RESIZE, KEYBD, NONE};
+enum{MOUSE, RESIZE, KEYBD, NET, NONE};
 
 mainstacksize = 32 * 1024;
 
@@ -108,6 +108,7 @@ handleaction(Rune rune)
 		inspection = 0;
 	/* fallthrough */
 	case 's':
+		resettileskip(curfloor);
 		goto draw;
 
 	case 'D':
@@ -156,6 +157,7 @@ handleaction(Rune rune)
 		goto draw;
 
 	case 'f':
+		resettileskip(curfloor);
 		cheatDefog = !cheatDefog;
 		goto draw;
 
@@ -164,6 +166,7 @@ handleaction(Rune rune)
 		/* Landing from teleport, update position */
 		if(cheatTeleport == 0){
 			curfloor->player->pos = dst;
+			resettileskip(curfloor);
 			goto draw;
 		}
 		break;
@@ -171,13 +174,14 @@ handleaction(Rune rune)
 	case 'L':
 		inspection = !inspection;
 		/* Viewing selected monster */
-		if(inspection == 0){
+		if(inspection == 0 && !eqpt(dst, curfloor->player->pos)){
 			int count = 1;
 			char *tmp, *buf, *cursor;
 
+			resettileskip(curfloor);
 			toinspect = point2creep(curfloor, dst);
 			if(toinspect == nil)
-				break;
+				goto draw;
 			cursor = buf = strdup(toinspect->info->desc);
 			draw(screen, Rpt(screen->r.min, Pt(screen->r.max.x, screen->r.min.y + 200)), white, nil, ZP);
 			string(screen, screen->r.min, black, screen->r.min, font, toinspect->info->name);
@@ -192,7 +196,7 @@ handleaction(Rune rune)
 			free(buf);
 			goto draw;
 		}
-		return;
+		goto draw;
 
 	/* Movement/Action keys */
 	case '<':
@@ -316,6 +320,8 @@ threadmain(int argc, char *argv[])
 	struct nk_user_font nkfont;
 	Mouse mouse;
 	Rune kbd;
+	char netin;
+	Channel *netc;
 	int resize[2];
 
 	if(initdraw(nil, nil, "lair") < 0)
@@ -326,10 +332,13 @@ threadmain(int argc, char *argv[])
 	if((kctl = initkeyboard(nil)) == nil)
 		sysfatal("%s: %r", argv0);
 
-	Alt alts[4] = {
+	netc = coninit(10);
+
+	Alt alts[] = {
 		{mctl->c, &mouse, CHANRCV},
 		{mctl->resizec, &resize, CHANRCV},
 		{kctl->c, &kbd, CHANRCV},
+		{netc, &netin, CHANRCV},
 		{nil, nil, CHANEND},
 	};
 
@@ -399,6 +408,9 @@ threadmain(int argc, char *argv[])
 				break;
 			case RESIZE:
 				eresized(1);
+				break;
+			case NET:
+				handleaction(netin);
 				break;
 		}
 	}
