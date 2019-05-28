@@ -179,12 +179,14 @@ struct Item {
 	int		pickedup;
 } Item;
 
+typedef struct Portal Portal;
 
-typedef
-struct Portal {
+struct
+Portal {
 	uchar tile;
 	Point pos;
-} Portal;
+	Portal *dest;
+};
 
 typedef
 struct Tile {
@@ -197,9 +199,10 @@ struct Tile {
 } Tile;
 
 /* Floor represents a single 'level' of the map */
-typedef
-struct Floor
-{
+typedef struct Floor Floor;
+
+struct
+Floor {
 	int 		rows, cols;
 	int			nrooms;
 	Rectangle 	rooms[ROOMNUMMAX];
@@ -209,9 +212,9 @@ struct Floor
 	Item		*items[ITEMMAX];
 	Tile		*map;
 	Portal		stairs[PORTALMAX];
-	Image 		*tilesheet;
 	Creep		*player;	/* Mankind truly is the worst enemy of them all */
-} Floor;
+	Floor		*prev, *next;
+};
 
 typedef
 struct Path{
@@ -231,6 +234,9 @@ extern Image *white;
 extern int cheatDefog;
 extern int cheatTeleport;
 
+/* Declared in floor.c */
+extern Image *tilesheet;
+
 /* Declared in monster.y */
 extern CreepLex *creeplexicon[MAXLEXICON];
 extern ItemLex *itemlexicon[MAXLEXICON];
@@ -242,8 +248,8 @@ void	quit(void);
 
 /* floor.c */
 Floor*	newfloor(void);
-void	nextfloor(Floor**);
-void	freefloor(Floor*, int);
+void	nextfloor(Floor**, Portal*);
+void	freefloor(Floor*);
 void	initmap(Floor *f);
 void	initfloor(Floor*);
 void	drawtotile(Floor*, Point, uchar);
@@ -265,7 +271,7 @@ void	discover(Floor*);
 void	resettileskip(Floor*);
 void 	drawstringtile(Floor*, Point, char*);
 void	redrawitem(Floor*);
-uchar	isonstair(Floor*);
+Portal*	isonstair(Floor*);
 Item*	isonitem(Floor*);
 
 /* path.c */

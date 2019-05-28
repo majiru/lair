@@ -91,6 +91,8 @@ handleaction(Rune rune)
 	Item *topickup;
 	Creep *toinspect;
 
+	Portal *p;
+
 	if(cheatTeleport == 0 && inspection == 0)
 		dst = curfloor->player->pos;
 
@@ -200,15 +202,17 @@ handleaction(Rune rune)
 
 	/* Movement/Action keys */
 	case '<':
-		if(isonstair(curfloor) == TPortalD){
-			nextfloor(&curfloor);
+		p = isonstair(curfloor);
+		if(p != nil && p->tile == TPortalD){
+			nextfloor(&curfloor, p);
 			goto draw;
 		}
 		return;
 
 	case '>':
-		if(isonstair(curfloor) == TPortalU){
-			nextfloor(&curfloor);
+		p = isonstair(curfloor);
+		if(p != nil && p->tile == TPortalU){
+			nextfloor(&curfloor, p);
 			goto draw;
 		}
 		return;

@@ -234,7 +234,7 @@ monstermenu(Floor *f, Point *p)
 		}else
 			cardinal[1] = "sorth";
 
-		draw(screen, Rpt(drawpos, addpt(drawpos, Pt(TILESIZE, TILESIZE))), f->tilesheet, nil, Pt(TILESIZE * f->creeps[i]->info->tile, (curdepth % PALETTENUM) * TILESIZE));
+		draw(screen, Rpt(drawpos, addpt(drawpos, Pt(TILESIZE, TILESIZE))), tilesheet, nil, Pt(TILESIZE * f->creeps[i]->info->tile, (curdepth % PALETTENUM) * TILESIZE));
 		snprint(buf, 256, "%s: %d %s, %d %s", f->creeps[i]->info->name, tmp.x, cardinal[0], tmp.y, cardinal[1]);
 		string(screen, addpt(drawpos, Pt(TILESIZE, 0)), black, addpt(drawpos, Pt(TILESIZE, 0)), font, buf);
 	}

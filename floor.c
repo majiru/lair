@@ -9,16 +9,15 @@
 
 #include "lair.h"
 
+Image *tilesheet;
+
 void
-freefloor(Floor *f, int freesheet)
+freefloor(Floor *f)
 {
 	while(f->ncreep != 0)
 		free(f->creeps[f->ncreep--]);
 
 	free(f->map);
-
-	if(freesheet)
-		freeimage(f->tilesheet);
 
 	free(f);
 }
@@ -30,10 +29,12 @@ initportal(Floor *f)
 	for(i = 0; i < PORTALMAX / 2; i++){
 		f->stairs[i].pos = randempty(f);
 		f->stairs[i].tile = TPortalD;
+		f->stairs[i].dest = nil;
 	}
 	for(i = 2; i < PORTALMAX; i++){
 		f->stairs[i].pos = randempty(f);
 		f->stairs[i].tile = TPortalU;
+		f->stairs[i].dest = nil;
 	}
 }
 
@@ -77,8 +78,8 @@ newfloor(void)
 	if((fd = open("tiles.img", OREAD)) < 0)
 		sysfatal("%s: Could not find tilemap", argv0);
 
-	f->tilesheet = readimage(display, fd, 0);
-	if(f->tilesheet  == nil){
+	tilesheet = readimage(display, fd, 0);
+	if(tilesheet  == nil){
 		fprint(2, "Could not load tilesheet: %r\n");
 		quit();
 	}
@@ -88,20 +89,59 @@ newfloor(void)
 }
 
 void
-nextfloor(Floor **f)
+nextfloor(Floor **f, Portal *src)
 {
-	Floor *newf = mallocz(sizeof(Floor), 1);
+	Floor *newf;
+
+	if(src->tile == TPortalD){
+		curdepth++;
+		newf = (*f)->next;
+	}else{
+		curdepth--;
+		newf = (*f)->prev;
+	}
+
+	if(newf != nil){
+		if(src->dest == nil)
+			if(src->tile == TPortalD){
+				src->dest = newf->stairs+(PORTALMAX/2)+1;
+				newf->stairs[PORTALMAX/2 + 1].dest = src;
+			}else{
+				src->dest = newf->stairs+1;
+				newf->stairs[1].dest = src;
+			}
+		newf->player->pos = src->dest->pos;
+		*f = newf;
+		resettileskip(newf);
+		return;
+	}
+
+	newf = mallocz(sizeof(Floor), 1);
+	if(src->tile == TPortalD){
+		(*f)->next = newf;
+		newf->prev = *f;
+	}else{
+		(*f)->prev = newf;
+		newf->next = *f;
+	}
+
 	newf->player = (*f)->player;
 	newf->map = malloc(sizeof(Tile));
-	newf->tilesheet = (*f)->tilesheet;
 	resizefloor(newf);
 
-	freefloor(*f, 0);
+	initfloor(newf);
 
-	curdepth++;
+	if(src->tile == TPortalD){
+		src->dest = newf->stairs+(PORTALMAX/2);
+		newf->stairs[PORTALMAX/2].dest = src;
+	}else{
+		src->dest = newf->stairs;
+		newf->stairs->dest = src;
+	}
+
+	newf->player->pos = src->dest->pos;
+	resettileskip(newf);
 	*f = newf;
-	initfloor(*f);
-	newf->player->pos = randempty(newf);
 }
 
 void
@@ -140,7 +180,7 @@ drawtile(Floor *f, Point p, uchar tile)
 	if(tile == THidden)
 		draw(screen, r, black, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
 	else
-		draw(screen, r, f->tilesheet, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
+		draw(screen, r, tilesheet, nil, Pt(TILESIZE * tile, (curdepth % PALETTENUM) * TILESIZE));
 }
 
 void
@@ -446,14 +486,14 @@ resizefloor(Floor *f)
 	f->cols = newcols;
 }
 
-uchar
+Portal*
 isonstair(Floor *f)
 {
 	int i;
 	for(i = 0; i < PORTALMAX; i++)
 		if(eqpt(f->stairs[i].pos, f->player->pos))
-			return f->stairs[i].tile;
-	return 0;
+			return f->stairs+i;
+	return nil;
 }
 
 Item*
