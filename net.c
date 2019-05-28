@@ -32,7 +32,17 @@ conhandler(void *arg)
 		threadexits(nil);
 	}
 	while(read(dfd, &buf, 1) == 1)
-		send(a->c, &buf);
+		switch(buf){
+		case 'h':
+		case 'j':
+		case 'k':
+		case 'l':
+		case '>':
+		case '<':
+			send(a->c, &buf);
+		}
+
+	free(arg);
 	close(dfd);
 	close(a->fd);
 	threadexits(nil);
@@ -45,7 +55,6 @@ conmanager(void *arg)
 	char  adir[40];
 
 	Channel *c = arg;
-	Arg a = {c, 0, ""};
 
 	threadsetgrp(5);
 
@@ -56,13 +65,14 @@ conmanager(void *arg)
 	}
 
 	for(;;){
-		a.fd = listen(adir, a.ldir);
-		if(a.fd < 0){
+		Arg *a = mallocz(sizeof(Arg), 1);
+		a->c = c;
+		a->fd = listen(adir, a->ldir);
+		if(a->fd < 0){
 			fprint(2, "Could not listen: %r\n");
 			threadexits(nil);
 		}
-
-		proccreate(conhandler, &a, 1024);
+		proccreate(conhandler, a, 8192);
 	}
 }
 
@@ -70,7 +80,7 @@ Channel*
 coninit(int buffsize)
 {
 	Channel *c = chancreate(sizeof(char), buffsize);
-	proccreate(conmanager, c, 1024);
+	proccreate(conmanager, c, 8192);
 	return c;
 }
 
